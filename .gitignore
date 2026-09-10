@@ -69,3 +69,12 @@ _push_tmp/
 .hermes/
 .trae/
 MODULE_ARCHITECTURE.pdf
+
+# Claude local session
+.claude/
+
+# Local-only assets
+image/
+logo/
+fake.jks
+fake.keystore
