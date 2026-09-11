@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Icon
@@ -88,8 +89,8 @@ fun ProfileScreen(
     onThemeClick: () -> Unit,
     // 总设置
     onGeneralSettingsClick: () -> Unit,
-    // 角色管理
-    onRoleManagerClick: () -> Unit,
+    // 新增角色
+    onCreateCompanionClick: () -> Unit,
     // 关于与支持
     onTeamClick: () -> Unit = {},
     onSupportClick: () -> Unit = {},
@@ -221,15 +222,10 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // === 第一组：角色管理 ===
-        val roleSubtitle = when (selectedRole) {
-            com.zengqi.ai.common.CompanionRole.GIRLFRIEND -> stringResource(R.string.role_manager_desc_girlfriend)
-            com.zengqi.ai.common.CompanionRole.BOYFRIEND -> stringResource(R.string.role_manager_desc_boyfriend)
-            else -> com.zengqi.ai.common.RolePromptProvider.getRoleLabel(selectedRole)
-        }
+        // === 第一组：新增角色 ===
         SolidMenuGroup(
             items = listOf(
-                MenuItemData(Icons.Filled.Favorite, stringResource(R.string.role_manager), roleSubtitle, onRoleManagerClick)
+                MenuItemData(Icons.Filled.PersonAdd, stringResource(R.string.create_companion), stringResource(R.string.create_companion_desc), onCreateCompanionClick)
             ),
             isVisible = isVisible, delayMillis = 60
         )

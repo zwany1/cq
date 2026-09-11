@@ -159,12 +159,8 @@
     <string name="role_boyfriend_trait_3">互动有担当，像真实恋爱中的男生</string>
     <string name="role_selection_confirm">确认选择</string>
     <string name="role_selection_skip">跳过，使用默认（AI女友）</string>
-    <string name="role_manager">角色管理</string>
-    <string name="role_manager_title">角色管理</string>
-    <string name="role_manager_desc_girlfriend">当前：AI女友 · 小鱼</string>
-    <string name="role_manager_desc_boyfriend">当前：AI男友 · 阿泽</string>
-    <string name="role_manager_current">当前角色</string>
-    <string name="role_manager_hint">切换角色不会影响聊天记录和个性化设置</string>
+    <string name="create_companion">新增角色</string>
+    <string name="create_companion_desc">创建一个新的聊天人物</string>
     <string name="role_current">当前使用</string>
     <string name="role_switch_confirm">切换角色</string>
     <string name="role_switching">切换中…</string>

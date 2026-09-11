@@ -9,7 +9,7 @@ import android.util.Log
  */
 
 object SecureLog {
-    private const val TAG = "LianYu"
+    private const val TAG = "Zengqi"
 
     /**
      * Release 构建应通过 ZengqiApplication 在 onCreate 中注入 false。

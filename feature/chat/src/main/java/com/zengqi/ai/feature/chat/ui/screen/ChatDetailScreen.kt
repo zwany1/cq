@@ -1,6 +1,8 @@
 package com.zengqi.ai.feature.chat.ui.screen
 
 import android.app.Application
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Edit
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
@@ -42,6 +45,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -69,7 +73,8 @@ import com.zengqi.ai.common.AppSettingsStore
 @Composable
 fun ChatDetailScreen(
     companionId: Long,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onSwitchCompanion: (Long) -> Unit
 ) {
     val context = LocalContext.current
     val store = remember { ChatDetailSettingsStore(context) }
@@ -78,6 +83,17 @@ fun ChatDetailScreen(
         factory = ChatViewModelFactory(context.applicationContext as Application, companionId)
     )
     val companionData by viewModel.companionData.collectAsState()
+
+    // 读取全部人物列表用于切换
+    val companionDao = remember {
+        com.zengqi.ai.database.AppDatabase.getDatabase(context).companionDao()
+    }
+    val allCompanions by produceState<List<com.zengqi.ai.database.model.CompanionEntity>>(
+        initialValue = emptyList(),
+        key1 = companionId
+    ) {
+        value = companionDao.getAllCompanionsSync()
+    }
     val settings by store.settingsFlow(companionId).collectAsState(initial = com.zengqi.ai.feature.chat.data.CompanionChatDetailSettings())
     val appSettingsStore = remember { AppSettingsStore(context) }
     var innerThoughtEnabled by remember { mutableStateOf(false) }
@@ -92,6 +108,7 @@ fun ChatDetailScreen(
     var showClearConfirm by remember { mutableStateOf(false) }
     var showResetConfirm by remember { mutableStateOf(false) }
     var showIntervalDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
 
@@ -154,6 +171,28 @@ fun ChatDetailScreen(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .clickable { showEditDialog = true }
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = "编辑",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "编辑头像和昵称",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
                 if (!companionData?.personality.isNullOrBlank()) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -176,6 +215,23 @@ fun ChatDetailScreen(
                     } else {
                         StatusTag("正常", Color(0xFF34C759))
                     }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // 切换人物
+            SectionTitle("切换人物")
+            SettingsCard {
+                allCompanions.forEachIndexed { index, c ->
+                    if (index > 0) {
+                        HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                    }
+                    SettingsRow(
+                        title = c.name,
+                        subtitle = if (c.id == companionId) "当前" else (c.relationship ?: c.personality?.take(20)),
+                        onClick = { onSwitchCompanion(c.id) }
+                    )
                 }
             }
 
@@ -442,6 +498,19 @@ fun ChatDetailScreen(
             }
         )
     }
+
+    // Edit companion dialog
+    if (showEditDialog) {
+        EditCompanionDialog(
+            currentName = companionData?.name ?: "",
+            currentAvatarUrl = companionData?.avatarUrl,
+            onDismiss = { showEditDialog = false },
+            onConfirm = { name, avatarUrl ->
+                viewModel.updateCompanionProfile(name, avatarUrl)
+                showEditDialog = false
+            }
+        )
+    }
 }
 
 @Composable
@@ -659,6 +728,82 @@ private fun IntervalInputDialog(
                     }
                 }
             ) { Text("确定", color = MaterialTheme.colorScheme.primary) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("取消", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        },
+        containerColor = MaterialTheme.colorScheme.surface
+    )
+}
+
+@Composable
+private fun EditCompanionDialog(
+    currentName: String,
+    currentAvatarUrl: String?,
+    onDismiss: () -> Unit,
+    onConfirm: (name: String, avatarUrl: String?) -> Unit
+) {
+    var name by remember { mutableStateOf(currentName) }
+    var avatarUrl by remember { mutableStateOf(currentAvatarUrl) }
+    val context = LocalContext.current
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            avatarUrl = uri.toString()
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("编辑头像和昵称", fontWeight = FontWeight.SemiBold) },
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { imagePicker.launch("image/*") },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (avatarUrl != null) {
+                        AsyncImage(
+                            model = avatarUrl,
+                            contentDescription = "头像",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Text(
+                            text = name.firstOrNull()?.toString() ?: "?",
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "点击更换头像",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("昵称") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(name.trim(), avatarUrl) },
+                enabled = name.isNotBlank()
+            ) { Text("保存", color = MaterialTheme.colorScheme.primary) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("取消", color = MaterialTheme.colorScheme.onSurfaceVariant) }

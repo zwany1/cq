@@ -47,7 +47,7 @@ class ChatMessageStorageTest {
                 timestamp = 1_700_000_000_500,
                 type = MessageType.IMAGE,
                 fileFormat = FileFormat.IMAGE,
-                linkString = "lianyu://file?kind=image&uri=content://media/image/1"
+                linkString = "zengqi://file?kind=image&uri=content://media/image/1"
             ),
             ChatMessage(
                 id = 3,
@@ -57,7 +57,7 @@ class ChatMessageStorageTest {
                 timestamp = 1_700_000_001_000,
                 type = MessageType.VOICE,
                 fileFormat = FileFormat.AUDIO,
-                linkString = "lianyu://file?kind=audio&uri=content://media/audio/1"
+                linkString = "zengqi://file?kind=audio&uri=content://media/audio/1"
             )
         )
 
@@ -72,7 +72,7 @@ class ChatMessageStorageTest {
             .toList()
 
         assertEquals(listOf(2L), result.map { it.id })
-        assertEquals("lianyu://file?kind=image&uri=content://media/image/1", result.single().linkString)
+        assertEquals("zengqi://file?kind=image&uri=content://media/image/1", result.single().linkString)
     }
 
     @Test
@@ -102,7 +102,7 @@ class ChatMessageStorageTest {
             isFromUser = true,
             timestamp = 1_700_000_123_456,
             fileFormat = FileFormat.IMAGE,
-            linkString = "lianyu://file?kind=image&uri=content://secure/image/9"
+            linkString = "zengqi://file?kind=image&uri=content://secure/image/9"
         )
 
         val encrypted = ChatMessageCrypto.encryptForStorage(message)

@@ -19,7 +19,7 @@ object NativeSafetyFilter {
     init {
         var available = false
         try {
-            System.loadLibrary("lianyu_security")
+            System.loadLibrary("zengqi_security")
             // 验证符号可解析：调用一个无副作用的轻量检测
             available = try {
                 probeNativeSymbol()
@@ -29,7 +29,7 @@ object NativeSafetyFilter {
                 false
             }
         } catch (e: UnsatisfiedLinkError) {
-            Log.w(TAG, "liblianyu_security.so not loaded: ${e.message}")
+            Log.w(TAG, "libzengqi_security.so not loaded: ${e.message}")
             // SO 可能由 Shell 机制加载，尝试探测
             available = try { probeNativeSymbol(); true }
             catch (_: UnsatisfiedLinkError) { false }

@@ -197,7 +197,7 @@ class AppUpdateManager(private val context: Context) {
         try {
             val uri = FileProvider.getUriForFile(
                 context,
-                "${context.packageName}.lianyu.fileprovider",
+                "${context.packageName}.fileprovider",
                 apkFile
             )
             val intent = Intent(Intent.ACTION_VIEW).apply {

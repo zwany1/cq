@@ -523,6 +523,23 @@ class ChatViewModel(
         }
     }
 
+    fun updateCompanionProfile(name: String?, avatarUrl: String?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val current = companionRepository.getCompanionById(companionId) ?: return@launch
+                val updated = current.copy(
+                    name = name?.takeIf { it.isNotBlank() } ?: current.name,
+                    avatarUrl = avatarUrl ?: current.avatarUrl,
+                    updatedAt = System.currentTimeMillis()
+                )
+                companionRepository.updateCompanion(updated)
+                _companionData.value = updated
+            } catch (e: Exception) {
+                SecureLog.e("ChatViewModel", "updateCompanionProfile failed", e)
+            }
+        }
+    }
+
     private fun loadAvailableApis() {
         viewModelScope.launch(Dispatchers.IO) {
             try {

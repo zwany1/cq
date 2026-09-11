@@ -62,7 +62,8 @@ fun ImportChatScreen(
     characterId: Long,
     onNavigateBack: () -> Unit,
     viewModel: ImportChatViewModel = viewModel(key = "import_chat_$characterId") {
-        ImportChatViewModel(android.app.Application(), characterId)
+        val app = LocalContext.current.applicationContext as android.app.Application
+        ImportChatViewModel(app, characterId)
     }
 ) {
     val state by viewModel.uiState.collectAsState()

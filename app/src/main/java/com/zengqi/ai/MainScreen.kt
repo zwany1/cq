@@ -269,8 +269,8 @@ fun MainScreen(mainActivity: Activity) {
                                     onThemeClick = { navController.navigate(MainRoute.Theme.route) },
                                     // 总设置
                                     onGeneralSettingsClick = { navController.navigate(MainRoute.GeneralSettings.route) },
-                                    // 角色管理
-                                    onRoleManagerClick = { navController.navigate(MainRoute.RoleManager.route) },
+                                    // 新增角色
+                                    onCreateCompanionClick = { navController.navigate(MainRoute.CreateCompanion.route) },
                                     // 关于与支持
                                     onTeamClick = { navController.navigate(MainRoute.Team.route) },
                                     onSupportClick = { navController.navigate(MainRoute.Support.route) },
@@ -340,7 +340,15 @@ fun MainScreen(mainActivity: Activity) {
                 }
                 composable(MainRoute.ChatDetail(0).route.replace("0", "{companionId}"), arguments = listOf(navArgument("companionId") { type = NavType.LongType })) { backStackEntry ->
                     val detailCompanionId = backStackEntry.arguments?.getLong("companionId") ?: 0L
-                    ChatDetailScreen(companionId = detailCompanionId, onNavigateBack = { navController.popBackStack() })
+                    ChatDetailScreen(
+                        companionId = detailCompanionId,
+                        onNavigateBack = { navController.popBackStack() },
+                        onSwitchCompanion = { newId ->
+                            navController.navigate("chat/$newId") {
+                                popUpTo("chat_detail/$detailCompanionId") { inclusive = true }
+                            }
+                        }
+                    )
                 }
                 composable(MainRoute.VoiceCall(0).route.replace("0", "{companionId}"), arguments = listOf(navArgument("companionId") { type = NavType.LongType })) { backStackEntry ->
                     val callCompanionId = backStackEntry.arguments?.getLong("companionId") ?: 0L
@@ -352,18 +360,6 @@ fun MainScreen(mainActivity: Activity) {
                 composable(MainRoute.TtsSettings.route) { TtsSettingsScreen(onNavigateBack = { navController.popBackStack() }, isDarkTheme = isDark) }
                 composable(MainRoute.TokenUsage.route) { TokenUsageScreen(onNavigateBack = { navController.popBackStack() }) }
                 composable(MainRoute.Memory.route) { MemoryScreen(onNavigateBack = { navController.popBackStack() }) }
-                composable(MainRoute.RoleManager.route) {
-                    val roleManagerViewModel: com.zengqi.ai.feature.profile.ProfileViewModel = viewModel()
-                    val managerCurrentRole by roleManagerViewModel.selectedRole.collectAsStateWithLifecycle()
-                    val managerSwitchState by roleManagerViewModel.switchState.collectAsStateWithLifecycle()
-                    com.zengqi.ai.feature.profile.RoleManagerScreen(
-                        currentRole = managerCurrentRole,
-                        switchState = managerSwitchState,
-                        onSwitchRole = { role -> roleManagerViewModel.switchRole(role) { navController.popBackStack() } },
-                        onNavigateBack = { navController.popBackStack() },
-                        onConsumeError = { roleManagerViewModel.consumeSwitchError() }
-                    )
-                }
                 composable(MainRoute.Theme.route) { ThemeScreen(onNavigateBack = { navController.popBackStack() }, activity = mainActivity) }
                 composable(MainRoute.Language.route) { LanguageScreen(onNavigateBack = { navController.popBackStack() }, activity = mainActivity) }
                 composable(MainRoute.CheckUpdate.route) { CheckUpdateScreen(onNavigateBack = { navController.popBackStack() }) }

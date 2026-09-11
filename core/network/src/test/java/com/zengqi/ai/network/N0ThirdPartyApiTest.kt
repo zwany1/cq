@@ -26,19 +26,19 @@ class N0ThirdPartyApiTest {
 
         assertTrue(chain.proceeded)
         val proceeded = chain.proceededRequest
-        assertNull(proceeded?.header("X-LianYu-Sig"))
-        assertNull(proceeded?.header("X-LianYu-Ts"))
-        assertNull(proceeded?.header("X-LianYu-Nonce"))
-        assertNull(proceeded?.header("X-LianYu-Client"))
+        assertNull(proceeded?.header("X-Zengqi-Sig"))
+        assertNull(proceeded?.header("X-Zengqi-Ts"))
+        assertNull(proceeded?.header("X-Zengqi-Nonce"))
+        assertNull(proceeded?.header("X-Zengqi-Client"))
     }
 
     @Test
-    fun intercept_keepsInternalSecurityHeadersForLianYuBackend() {
+    fun intercept_keepsInternalSecurityHeadersForZengqiBackend() {
         val interceptor = N0(
             signer = N0.Signer { "abc123" }
         )
         val request = Request.Builder()
-            .url("https://api.lianyu.app/v1/sync")
+            .url("https://api.zengqi.app/v1/sync")
             .get()
             .build()
         val chain = RecordingChain(request)
@@ -46,7 +46,7 @@ class N0ThirdPartyApiTest {
         interceptor.intercept(chain)
 
         assertTrue(chain.proceeded)
-        assertEquals("abc123", chain.proceededRequest?.header("X-LianYu-Sig"))
+        assertEquals("abc123", chain.proceededRequest?.header("X-Zengqi-Sig"))
     }
 
     private class RecordingChain(

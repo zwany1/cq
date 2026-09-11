@@ -11,7 +11,7 @@ import android.graphics.Bitmap
 object NativeCodec {
 
     init {
-        try { System.loadLibrary("lianyu_security") }
+        try { System.loadLibrary("zengqi_security") }
         catch (e: UnsatisfiedLinkError) { /* already loaded */ }
     }
 

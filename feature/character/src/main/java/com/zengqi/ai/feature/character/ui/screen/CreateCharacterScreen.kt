@@ -392,59 +392,6 @@ fun CreateCharacterScreen(
             ) {
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // 角色类型选择
-                AnimatedVisibility(
-                    visible = isVisible,
-                    enter = fadeIn(tween(400, delayMillis = 80)) +
-                            slideInVertically(tween(400, delayMillis = 80)) { it / 3 }
-                ) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceVariant),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(14.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.role_type),
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 13.sp
-                                ),
-                                color = colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                RoleToggleChip(
-                                    role = CompanionRole.GIRLFRIEND,
-                                    icon = Icons.Filled.Favorite,
-                                    label = stringResource(R.string.role_girlfriend),
-                                    accentColor = Color(0xFFFF6B9D),
-                                    selected = role == CompanionRole.GIRLFRIEND,
-                                    onClick = { role = CompanionRole.GIRLFRIEND },
-                                    modifier = Modifier.weight(1f)
-                                )
-                                RoleToggleChip(
-                                    role = CompanionRole.BOYFRIEND,
-                                    icon = Icons.Filled.Shield,
-                                    label = stringResource(R.string.role_boyfriend),
-                                    accentColor = Color(0xFF4A90E2),
-                                    selected = role == CompanionRole.BOYFRIEND,
-                                    onClick = { role = CompanionRole.BOYFRIEND },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-                    }
-                }
-
                 AnimatedFormField(
                     visible = isVisible,
                     delayMillis = 100,

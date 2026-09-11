@@ -237,7 +237,7 @@ fun ChatScreen(
             photoFile.parentFile?.mkdirs()
             photoFile.createNewFile()
             val photoUri = androidx.core.content.FileProvider.getUriForFile(
-                context, "${context.packageName}.lianyu.fileprovider", photoFile
+                context, "${context.packageName}.fileprovider", photoFile
             )
             cameraPhotoUri = photoUri
             cameraLauncher.launch(photoUri)

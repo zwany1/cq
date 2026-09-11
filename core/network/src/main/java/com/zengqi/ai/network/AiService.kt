@@ -367,7 +367,7 @@ class AiService(context: Context) : AiServiceProvider {
 
         private fun shouldSignRequest(request: okhttp3.Request): Boolean {
             val host = request.url.host.lowercase()
-            return host == "api.lianyu.ai" || host.endsWith(".lianyu.ai")
+            return host == "api.zengqi.ai" || host.endsWith(".zengqi.ai")
         }
 
         private var context: Context? = null
