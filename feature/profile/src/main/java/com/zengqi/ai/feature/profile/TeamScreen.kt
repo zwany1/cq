@@ -56,11 +56,11 @@ data class TeamMember(
 
 val teamMembers = listOf(
     TeamMember(
-        name = "少帅",
+        name = "zwany1",
         role = "作者",
         description = "曾栖的全部开发与维护",
         color = Color(0xFF07C160),
-        avatarRes = null
+        avatarRes = R.drawable.team_avatar
     )
 )
 

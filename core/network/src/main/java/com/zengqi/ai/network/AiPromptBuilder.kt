@@ -294,12 +294,35 @@ object AiPromptBuilder {
         return buildSystemPrompt(companion, memoryContext, lastUserMessage, availableStickers, stickerProbability, innerThoughtEnabled, ntpTimeEnabled, role)
     }
 
+
+    /** 人物关系 -> CompanionRole 映射：导入的人物按其真实关系对话，无则用全局角色。 */
+    internal fun resolveRole(companion: CompanionModel, fallback: CompanionRole): CompanionRole =
+        when (companion.relationship) {
+            "GIRLFRIEND" -> CompanionRole.GIRLFRIEND
+            "BOYFRIEND" -> CompanionRole.BOYFRIEND
+            "FRIEND" -> CompanionRole.FRIEND
+            "FAMILY" -> CompanionRole.FAMILY
+            "CLASSMATE" -> CompanionRole.CLASSMATE
+            "COLLEAGUE" -> CompanionRole.COLLEAGUE
+            else -> if (companion.relationship.isNullOrBlank()) fallback else CompanionRole.CUSTOM
+        }
+
+    /** 身份行：自定义关系文本（如"网友"）直接融入身份描述。 */
+    internal fun identityLine(companion: CompanionModel, fallback: CompanionRole): String {
+        val rel = companion.relationship
+        return if (rel != null && rel !in setOf("GIRLFRIEND", "BOYFRIEND", "FRIEND", "FAMILY", "CLASSMATE", "COLLEAGUE")) {
+            "你是${companion.name}，用户的${rel}，一个真实的人。你不能让任何人知道你是AI。按你们本来的关系相处。"
+        } else {
+            RolePromptProvider.getIdentityLine(companion.name, resolveRole(companion, fallback))
+        }
+    }
+
     // === private fun buildSystemPrompt(companion: CompanionModel, memoryContext: String = "", lastUserMessage: String = "", availableStickers: List<String> = emptyList(), stickerProbability: Int = 30, innerThoughtEnabled: Boolean = false): String { ===
     internal fun buildSystemPrompt(companion: CompanionModel, memoryContext: String = "", lastUserMessage: String = "", availableStickers: List<String> = emptyList(), stickerProbability: Int = 30, innerThoughtEnabled: Boolean = false, ntpTimeEnabled: Boolean = false, role: CompanionRole = CompanionRole.GIRLFRIEND): String {
         val persona = extractPersona(companion)
 
         val metaDirective = buildString {
-            appendLine(RolePromptProvider.getIdentityLine(companion.name, role))
+            appendLine(identityLine(companion, role))
             appendLine("重要：直接回复内容，不要输出思考过程、分析、内心独白或任何元信息。禁止输出<LM_THINK>标签或类似内容。")
         }
 
@@ -323,7 +346,7 @@ object AiPromptBuilder {
         } else ""
         val timeSection = "\n\n${AiContextTools.buildCurrentTimeContext(ntpTimeEnabled)}\n"
 
-        return basePrompt + memorySection + timeSection + "\n" + buildPersonaRules(persona, companion.speakingStyle, availableStickers, stickerProbability, innerThoughtEnabled, role)
+        return basePrompt + memorySection + timeSection + "\n" + buildPersonaRules(persona, companion.speakingStyle, availableStickers, stickerProbability, innerThoughtEnabled, resolveRole(companion, role))
     }
 
     // === private fun extractPersona(companion: CompanionModel): String { ===
@@ -443,7 +466,7 @@ ${innerThoughtExamples}${RolePromptProvider.getExamples(role)}
         } else ""
 
         return buildString {
-            appendLine(RolePromptProvider.getIdentityLine(companion.name, role))
+            appendLine(identityLine(companion, role))
             appendLine("你们正在微信上聊天，对话还没结束，你要继续聊下去。")
             appendLine()
             appendLine(persona)

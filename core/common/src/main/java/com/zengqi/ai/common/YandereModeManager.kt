@@ -219,6 +219,7 @@ class YandereModeManager(private val context: Context) {
         val possessiveWord = when (role) {
             CompanionRole.BOYFRIEND -> "占有欲"
             CompanionRole.GIRLFRIEND -> "占有欲、吃醋"
+            else -> "在意"
         }
 
         val sb = StringBuilder()

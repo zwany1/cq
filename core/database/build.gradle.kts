@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.devtools.ksp)
 }
@@ -21,6 +22,10 @@ android {
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
     }
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 dependencies {

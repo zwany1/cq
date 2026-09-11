@@ -45,6 +45,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -112,6 +113,8 @@ fun CreateCharacterScreen(
 
     var role by remember { mutableStateOf(globalRole) }
     var name by remember { mutableStateOf("") }
+    var relationship by remember { mutableStateOf<String?>(null) }
+    var customRelationship by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
     var bodyType by remember { mutableStateOf("") }
     var profession by remember { mutableStateOf("") }
@@ -151,6 +154,7 @@ fun CreateCharacterScreen(
         rawPrompt = companion.rawPrompt.orEmpty()
         systemPrompt = companion.systemPrompt.orEmpty()
         avatarUri = companion.avatarUrl
+        relationship = companion.relationship
     }
 
     fun handleImportError(message: String) {
@@ -232,6 +236,7 @@ fun CreateCharacterScreen(
     val accentColor = when (role) {
         CompanionRole.GIRLFRIEND -> Color(0xFFFF6B9D)
         CompanionRole.BOYFRIEND -> Color(0xFF4A90E2)
+        else -> Color(0xFF26A69A)
     }
     val accentGradient = when (role) {
         CompanionRole.GIRLFRIEND -> listOf(
@@ -242,10 +247,15 @@ fun CreateCharacterScreen(
             Color(0xFF4A90E2).copy(alpha = 0.9f),
             Color(0xFF6BA5E7).copy(alpha = 0.8f)
         )
+        else -> listOf(
+            Color(0xFF26A69A).copy(alpha = 0.9f),
+            Color(0xFF4DB6AC).copy(alpha = 0.8f)
+        )
     }
     val roleIcon: ImageVector = when (role) {
         CompanionRole.GIRLFRIEND -> Icons.Filled.Favorite
         CompanionRole.BOYFRIEND -> Icons.Filled.Shield
+        else -> Icons.Filled.Face
     }
 
     Scaffold(
@@ -255,10 +265,8 @@ fun CreateCharacterScreen(
                 title = {
                     Text(
                         text = when {
-                            isEditMode && role == CompanionRole.BOYFRIEND -> stringResource(R.string.edit_companion_boyfriend)
-                            isEditMode -> stringResource(R.string.edit_companion_girlfriend)
-                            role == CompanionRole.BOYFRIEND -> stringResource(R.string.create_companion_boyfriend)
-                            else -> stringResource(R.string.create_companion_girlfriend)
+                            isEditMode -> "编辑人物"
+                            else -> "创建人物"
                         },
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.SemiBold,
@@ -363,6 +371,7 @@ fun CreateCharacterScreen(
                                 when (role) {
                                     CompanionRole.GIRLFRIEND -> stringResource(R.string.name_hint_girlfriend)
                                     CompanionRole.BOYFRIEND -> stringResource(R.string.name_hint_boyfriend)
+                                    else -> "TA"
                                 }
                             } else name,
                             style = MaterialTheme.typography.titleMedium.copy(
@@ -442,13 +451,94 @@ fun CreateCharacterScreen(
                     label = stringResource(R.string.name_label),
                     value = name,
                     onValueChange = { name = it },
-                    placeholder = when (role) {
-                        CompanionRole.GIRLFRIEND -> stringResource(R.string.name_placeholder_girlfriend)
-                        CompanionRole.BOYFRIEND -> stringResource(R.string.name_placeholder_boyfriend)
-                    },
+                    placeholder = "TA 的名字",
                     imeAction = ImeAction.Next,
                     accentColor = accentColor
                 )
+
+                AnimatedVisibility(
+                    visible = isVisible,
+                    enter = fadeIn(tween(400, delayMillis = 115)) +
+                            slideInVertically(tween(400, delayMillis = 115)) { it / 2 }
+                ) {
+                    Column {
+                        Text(
+                            text = "和你的关系",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        androidx.compose.foundation.layout.FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            val options = listOf(
+                                "女朋友" to "GIRLFRIEND",
+                                "男朋友" to "BOYFRIEND",
+                                "好朋友" to "FRIEND",
+                                "家人" to "FAMILY",
+                                "同学" to "CLASSMATE",
+                                "同事" to "COLLEAGUE"
+                            )
+                            options.forEach { (label, value) ->
+                                val selected = relationship == value ||
+                                        (relationship == null && value == "GIRLFRIEND")
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(18.dp))
+                                        .background(
+                                            if (selected) accentColor.copy(alpha = 0.25f)
+                                            else colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                        )
+                                        .border(
+                                            width = if (selected) 1.dp else 0.dp,
+                                            color = if (selected) accentColor else Color.Transparent,
+                                            shape = RoundedCornerShape(18.dp)
+                                        )
+                                        .clickable {
+                                            relationship = value
+                                            if (value != "CUSTOM") customRelationship = ""
+                                        }
+                                        .padding(horizontal = 14.dp, vertical = 7.dp)
+                                ) {
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                                        color = if (selected) accentColor else colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        OutlinedTextField(
+                            value = customRelationship,
+                            onValueChange = {
+                                customRelationship = it
+                                if (it.isNotBlank()) relationship = "CUSTOM"
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = accentColor.copy(alpha = 0.3f),
+                                unfocusedBorderColor = colorScheme.outline.copy(alpha = 0.5f),
+                                focusedContainerColor = colorScheme.surface.copy(alpha = 0.3f),
+                                unfocusedContainerColor = Color.Transparent
+                            ),
+                            placeholder = {
+                                Text(
+                                    "自定义关系（网友、发小、前任……）",
+                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                )
+                            },
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp)
+                        )
+                    }
+                }
 
                 AnimatedFormField(
                     visible = isVisible,
@@ -471,6 +561,7 @@ fun CreateCharacterScreen(
                     placeholder = when (role) {
                         CompanionRole.GIRLFRIEND -> stringResource(R.string.body_type_placeholder_girlfriend)
                         CompanionRole.BOYFRIEND -> stringResource(R.string.body_type_placeholder_boyfriend)
+                        else -> "可留空"
                     },
                     imeAction = ImeAction.Next,
                     accentColor = accentColor,
@@ -487,6 +578,7 @@ fun CreateCharacterScreen(
                     placeholder = when (role) {
                         CompanionRole.GIRLFRIEND -> stringResource(R.string.profession_placeholder_girlfriend)
                         CompanionRole.BOYFRIEND -> stringResource(R.string.profession_placeholder_boyfriend)
+                        else -> "学生 / 上班族 / 自由职业……"
                     },
                     imeAction = ImeAction.Next,
                     accentColor = accentColor,
@@ -693,6 +785,7 @@ fun CreateCharacterScreen(
                                         when (role) {
                                             CompanionRole.GIRLFRIEND -> stringResource(R.string.reference_character)
                                             CompanionRole.BOYFRIEND -> stringResource(R.string.reference_character_boyfriend)
+                                            else -> "参考角色（可选）"
                                         },
                                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                                         color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
@@ -707,6 +800,7 @@ fun CreateCharacterScreen(
                                 text = when (role) {
                                     CompanionRole.GIRLFRIEND -> stringResource(R.string.role_hint_girlfriend)
                                     CompanionRole.BOYFRIEND -> stringResource(R.string.role_hint_boyfriend)
+                                    else -> "描述TA的性格与说话方式，或导入聊天记录自动学习"
                                 },
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     fontSize = 11.sp
@@ -761,6 +855,11 @@ fun CreateCharacterScreen(
                     Button(
                         onClick = {
                             if (isFormValid) {
+                                val effectiveRelationship = when (relationship) {
+                                    "GIRLFRIEND", "BOYFRIEND", "FRIEND", "FAMILY", "CLASSMATE", "COLLEAGUE" -> relationship
+                                    "CUSTOM" -> customRelationship.trim().ifBlank { "朋友" }
+                                    else -> null
+                                }
                                 val companion = CompanionEntity(
                                     id = companionId ?: 0,
                                     name = name.trim(),
@@ -769,6 +868,7 @@ fun CreateCharacterScreen(
                                     personality = rawPrompt.trim(),
                                     backstory = null,
                                     speakingStyle = null,
+                                    relationship = effectiveRelationship,
                                     tags = null,
                                     rawPrompt = rawPrompt.trim(),
                                     systemPrompt = systemPrompt.trim().takeIf { it.isNotBlank() }
@@ -830,8 +930,7 @@ fun CreateCharacterScreen(
                                     text = when {
                                         isSaving -> "保存中..."
                                         isEditMode -> stringResource(R.string.save_changes)
-                                        role == CompanionRole.BOYFRIEND -> stringResource(R.string.create_boyfriend)
-                                        else -> stringResource(R.string.create_girlfriend)
+                                        else -> "创建"
                                     },
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.SemiBold,

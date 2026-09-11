@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -11,7 +12,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures { buildConfig = true }
-    kotlin { jvmToolchain(17) }
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 dependencies {

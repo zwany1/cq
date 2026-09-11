@@ -54,7 +54,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zengqi.ai.domain.model.BuildStatus
 
 /**
- * 聊天记录导入页：选择文件 → 识别双方 → 选择"她" → 开始构建。
+ * 聊天记录导入页：选择文件 → 识别双方 → 选择要重建的 TA → 开始构建。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -153,7 +153,7 @@ fun ImportChatScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "哪一位是「她」？",
+                        "哪一位是「TA」？",
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -194,7 +194,7 @@ fun ImportChatScreen(
                 ImportPhase.BUILDING -> {
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text("正在认识她……", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text("正在认识TA……", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(20.dp))
                     BuildStatusSteps(state.buildStatus)
                 }
@@ -205,7 +205,7 @@ fun ImportChatScreen(
                     Text("构建完成", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "现在可以回去和「她」聊聊了",
+                        "现在可以回去和「TA」聊聊了",
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center

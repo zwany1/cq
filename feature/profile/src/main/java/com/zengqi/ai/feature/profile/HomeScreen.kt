@@ -127,7 +127,7 @@ fun HomeScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Person,
-                                contentDescription = "添加女友",
+                                contentDescription = "添加人物",
                                 modifier = Modifier.size(20.dp),
                                 tint = colorScheme.onSurface
                             )
@@ -359,7 +359,7 @@ fun EmptyHomeState() {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "去通讯录找你的女友聊天吧",
+                text = "去通讯录找TA聊天吧",
                 style = MaterialTheme.typography.bodyMedium,
                 color = colorScheme.onSurfaceVariant
             )

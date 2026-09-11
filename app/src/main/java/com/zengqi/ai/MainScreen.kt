@@ -324,7 +324,7 @@ fun MainScreen(mainActivity: Activity) {
                     }
                     if (showThatDaySheet) {
                         ThatDaySheet(
-                            characterName = characterName.ifBlank { "她" },
+                            characterName = characterName.ifBlank { "TA" },
                             date = java.time.LocalDate.now().minusDays(1),
                             onDismiss = { showThatDaySheet = false },
                             viewModel = recallViewModel
@@ -332,7 +332,7 @@ fun MainScreen(mainActivity: Activity) {
                     }
                     if (showMemorySheet) {
                         MemorySheet(
-                            characterName = characterName.ifBlank { "她" },
+                            characterName = characterName.ifBlank { "TA" },
                             onDismiss = { showMemorySheet = false },
                             viewModel = recallViewModel
                         )

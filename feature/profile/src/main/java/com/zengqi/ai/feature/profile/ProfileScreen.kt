@@ -225,6 +225,7 @@ fun ProfileScreen(
         val roleSubtitle = when (selectedRole) {
             com.zengqi.ai.common.CompanionRole.GIRLFRIEND -> stringResource(R.string.role_manager_desc_girlfriend)
             com.zengqi.ai.common.CompanionRole.BOYFRIEND -> stringResource(R.string.role_manager_desc_boyfriend)
+            else -> com.zengqi.ai.common.RolePromptProvider.getRoleLabel(selectedRole)
         }
         SolidMenuGroup(
             items = listOf(

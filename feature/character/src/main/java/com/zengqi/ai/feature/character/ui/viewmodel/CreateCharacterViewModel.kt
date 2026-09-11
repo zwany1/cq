@@ -115,6 +115,7 @@ class CreateCharacterViewModel(application: Application) : AndroidViewModel(appl
     fun bodyTypeSuggestions(role: CompanionRole): List<String> = when (role) {
         CompanionRole.GIRLFRIEND -> listOf("纤细", "匀称", "娇小", "高挑", "微胖", "元气")
         CompanionRole.BOYFRIEND -> listOf("偏瘦", "健壮", "高挑", "结实", "清瘦", "运动型")
+        else -> emptyList()
     }
 
     /**
@@ -123,6 +124,7 @@ class CreateCharacterViewModel(application: Application) : AndroidViewModel(appl
     fun professionSuggestions(role: CompanionRole): List<String> = when (role) {
         CompanionRole.GIRLFRIEND -> listOf("学生", "插画师", "幼师", "护士", "文员", "自由职业")
         CompanionRole.BOYFRIEND -> listOf("程序员", "设计师", "医生", "工程师", "教师", "自由职业")
+        else -> listOf("学生", "上班族", "自由职业", "医生", "老师", "程序员")
     }
 
     /**
@@ -136,6 +138,10 @@ class CreateCharacterViewModel(application: Application) : AndroidViewModel(appl
         CompanionRole.BOYFRIEND -> listOf(
             "可靠", "温柔", "有担当", "护短", "沉稳", "直率", "笨拙温柔",
             "细心", "爱吃醋", "爽朗", "理性", "宠溺", "安全感", "闷骚"
+        )
+        else -> listOf(
+            "直率", "幽默", "仗义", "细心", "靠谱", "活泼", "闷骚",
+            "毒舌", "温柔", "爱吐槽", "仗义", "宅", "social", "慢热"
         )
     }
 
@@ -155,10 +161,12 @@ class CreateCharacterViewModel(application: Application) : AndroidViewModel(appl
                 val roleLabel = when (role) {
                     CompanionRole.GIRLFRIEND -> "AI女友"
                     CompanionRole.BOYFRIEND -> "AI男友"
+                    else -> "人物（" + com.zengqi.ai.common.RolePromptProvider.getRoleLabel(role) + "）"
                 }
                 val pronoun = when (role) {
                     CompanionRole.GIRLFRIEND -> "她"
                     CompanionRole.BOYFRIEND -> "他"
+                    else -> "TA"
                 }
                 val refPart = if (!referenceCharacter.isNullOrBlank()) {
                     "\n参考角色风格：$referenceCharacter"

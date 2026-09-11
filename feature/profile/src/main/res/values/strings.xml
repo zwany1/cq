@@ -5,7 +5,7 @@
     <string name="profile_edit">编辑</string>
     <string name="profile_avatar_hint">点击头像更换，点击名字编辑</string>
     <string name="memory_management">记忆管理</string>
-    <string name="memory_management_desc">查看虚拟恋人记住的关于你的事</string>
+    <string name="memory_management_desc">查看人物记住的关于你的事</string>
     <string name="api_settings">API设置</string>
     <string name="api_settings_desc">配置AI接口</string>
     <string name="theme_mode">主题模式</string>
@@ -40,7 +40,7 @@
     <string name="check_new_version">检查新版本</string>
     <string name="check_new_version_desc">检查可用更新</string>
     <string name="notification_permission">通知权限</string>
-    <string name="notification_permission_desc">接收虚拟恋人消息提醒</string>
+    <string name="notification_permission_desc">接收人物消息提醒</string>
     <string name="battery_whitelist">电池优化白名单</string>
     <string name="battery_whitelist_desc">确保后台消息正常推送</string>
     <string name="auto_start">自启动权限</string>
@@ -83,7 +83,7 @@
     <string name="originos_adaption_detected_6">已检测到 OriginOS 6 / IQOO，建议逐项开启以下设置以保证后台稳定</string>
     <string name="originos_adaption_detected_other">当前设备未检测到 OriginOS 6，以下设置在通用安卓上同样适用</string>
     <string name="originos_adaption_notification">通知权限</string>
-    <string name="originos_adaption_notification_desc">接收虚拟恋人消息提醒</string>
+    <string name="originos_adaption_notification_desc">接收人物消息提醒</string>
     <string name="originos_adaption_battery">忽略电池优化</string>
     <string name="originos_adaption_battery_desc">防止 Doze 模式限制后台运行</string>
     <string name="originos_adaption_autostart">允许自启动</string>
@@ -129,8 +129,8 @@
     <string name="feature_refresh_desc">支持 90/120/144/165Hz 流畅体验</string>
     <string name="feature_ui">精致UI设计</string>
     <string name="feature_ui_desc">简洁优雅的视觉设计和动画效果</string>
-    <string name="feature_edit">虚拟恋人编辑</string>
-    <string name="feature_edit_desc">随时修改恋人的人设和性格</string>
+    <string name="feature_edit">人物编辑</string>
+    <string name="feature_edit_desc">随时修改TA的人设和性格</string>
     <string name="view_agreement">查看用户协议与免责声明</string>
 
     <!-- Auth Screen -->
@@ -143,8 +143,8 @@
     <string name="login_button">登录</string>
 
     <!-- 角色选择与管理 -->
-    <string name="role_selection_title">选择你的 AI 伴侣</string>
-    <string name="role_selection_subtitle">选择后将影响对话风格、语气与互动模式</string>
+    <string name="role_selection_title">你想先见到的TA是谁</string>
+    <string name="role_selection_subtitle">恋人、朋友、家人……之后也可以导入聊天记录，重建任何一个人</string>
     <string name="role_girlfriend_title">AI女友</string>
     <string name="role_girlfriend_name">小鱼</string>
     <string name="role_girlfriend_desc">温柔体贴、有点粘人的 AI 女友，喜欢分享日常、关心你的情绪。</string>

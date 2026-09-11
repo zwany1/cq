@@ -13,22 +13,22 @@
     <string name="delete_confirm_msg">确定要删除 %1$s 吗？此操作不可恢复。</string>
     <string name="delete">删除</string>
     <string name="cancel">取消</string>
-    <string name="my_girlfriends">我的恋人</string>
-    <string name="add_girlfriend">添加恋人</string>
-    <string name="no_companions">还没有虚拟恋人</string>
-    <string name="create_hint">点击右下角创建你的专属恋人吧</string>
+    <string name="my_girlfriends">我的人物</string>
+    <string name="add_girlfriend">添加人物</string>
+    <string name="no_companions">还没有创建人物</string>
+    <string name="create_hint">点击右下角创建你要重建的那个人</string>
     <string name="friends">好友</string>
     <string name="no_contacts">还没有联系人</string>
-    <string name="add_hint">点击右下角添加你的专属恋人</string>
+    <string name="add_hint">点击右下角添加你要重建的那个人</string>
     <string name="import_from_file">从文件导入</string>
     <string name="import_failed">导入失败</string>
     <string name="ok">确定</string>
 
     <!-- 角色差异化文案：创建/编辑页使用 -->
-    <string name="create_companion_girlfriend">创建专属女友</string>
-    <string name="create_companion_boyfriend">创建专属男友</string>
-    <string name="edit_companion_girlfriend">编辑女友</string>
-    <string name="edit_companion_boyfriend">编辑男友</string>
+    <string name="create_companion_girlfriend">创建人物</string>
+    <string name="create_companion_boyfriend">创建人物</string>
+    <string name="edit_companion_girlfriend">编辑人物</string>
+    <string name="edit_companion_boyfriend">编辑人物</string>
     <string name="name_hint_girlfriend">给她起个名字吧</string>
     <string name="name_hint_boyfriend">给他起个名字吧</string>
     <string name="name_placeholder_girlfriend">例如：小樱</string>
@@ -44,8 +44,8 @@
     <string name="role_type">角色类型</string>
     <string name="role_girlfriend">AI女友</string>
     <string name="role_boyfriend">AI男友</string>
-    <string name="role_hint_girlfriend">直接输入完整人设，例如：林念安，18岁，温柔体贴的学霸女友...</string>
-    <string name="role_hint_boyfriend">直接输入完整人设，例如：陆川，22岁，外冷内热的理科男友...</string>
+    <string name="role_hint_girlfriend">直接输入完整人设，或导入聊天记录让TA自动生成</string>
+    <string name="role_hint_boyfriend">直接输入完整人设，或导入聊天记录让TA自动生成</string>
     <string name="create_girlfriend">创建女友</string>
     <string name="create_boyfriend">创建男友</string>
     <string name="ai_generate">AI 生成</string>

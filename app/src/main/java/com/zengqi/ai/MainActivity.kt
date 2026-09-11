@@ -108,7 +108,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 onSkip = {
-                                    profileViewModel.switchRole(CompanionRole.GIRLFRIEND) {
+                                    profileViewModel.switchRole(CompanionRole.FRIEND) {
                                         showRoleSelection = false
                                     }
                                 }

@@ -39,6 +39,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
@@ -183,12 +184,14 @@ fun RoleManagerScreen(
                             val accentColor = when (role) {
                                 CompanionRole.GIRLFRIEND -> Color(0xFFFF6B9D)
                                 CompanionRole.BOYFRIEND -> Color(0xFF4A90E2)
+                                else -> Color(0xFF26A69A)
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = when (role) {
                                         CompanionRole.GIRLFRIEND -> stringResource(R.string.role_girlfriend_title)
                                         CompanionRole.BOYFRIEND -> stringResource(R.string.role_boyfriend_title)
+                                        else -> "默认角色：" + com.zengqi.ai.common.RolePromptProvider.getRoleLabel(role)
                                     },
                                     style = MaterialTheme.typography.headlineMedium.copy(
                                         fontWeight = FontWeight.Bold,
@@ -323,6 +326,7 @@ private fun RoleSwitchLoadingOverlay(
     val accentColor = when (role) {
         CompanionRole.GIRLFRIEND -> Color(0xFFFF6B9D)
         CompanionRole.BOYFRIEND -> Color(0xFF4A90E2)
+        else -> Color(0xFF26A69A)
     }
 
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
@@ -379,6 +383,7 @@ private fun RoleSwitchLoadingOverlay(
                     imageVector = when (role) {
                         CompanionRole.GIRLFRIEND -> Icons.Filled.Favorite
                         CompanionRole.BOYFRIEND -> Icons.Filled.Shield
+                        else -> Icons.Filled.Face
                     },
                     contentDescription = null,
                     tint = accentColor.copy(alpha = pulseAlpha),

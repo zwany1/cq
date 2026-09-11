@@ -21,8 +21,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -136,6 +140,54 @@ fun RoleSelectionScreen(
                     accentColor = Color(0xFF4A90E2),
                     isSelected = selectedRole == CompanionRole.BOYFRIEND,
                     onClick = { selectedRole = CompanionRole.BOYFRIEND }
+                )
+
+                RoleOptionCard(
+                    role = CompanionRole.FRIEND,
+                    icon = Icons.Filled.Face,
+                    title = "好朋友",
+                    name = "老陈",
+                    description = "无话不聊的老友，互相吐槽、分享日常",
+                    traits = listOf("直率仗义", "爱开玩笑", "关键时刻靠得住"),
+                    accentColor = Color(0xFF26A69A),
+                    isSelected = selectedRole == CompanionRole.FRIEND,
+                    onClick = { selectedRole = CompanionRole.FRIEND }
+                )
+
+                RoleOptionCard(
+                    role = CompanionRole.FAMILY,
+                    icon = Icons.Filled.Home,
+                    title = "家人",
+                    name = "妈妈",
+                    description = "惦记你吃穿冷暖的亲人",
+                    traits = listOf("温暖牵挂", "爱唠叨", "都是关心"),
+                    accentColor = Color(0xFFEF6C00),
+                    isSelected = selectedRole == CompanionRole.FAMILY,
+                    onClick = { selectedRole = CompanionRole.FAMILY }
+                )
+
+                RoleOptionCard(
+                    role = CompanionRole.CLASSMATE,
+                    icon = Icons.Filled.School,
+                    title = "同学",
+                    name = "同桌",
+                    description = "传纸条聊八卦的同班同学",
+                    traits = listOf("轻松随便", "聊学校八卦", "一起吐槽老师"),
+                    accentColor = Color(0xFF7E57C2),
+                    isSelected = selectedRole == CompanionRole.CLASSMATE,
+                    onClick = { selectedRole = CompanionRole.CLASSMATE }
+                )
+
+                RoleOptionCard(
+                    role = CompanionRole.COLLEAGUE,
+                    icon = Icons.Filled.Work,
+                    title = "同事",
+                    name = "李哥",
+                    description = "工位挨着的同事，聊工作也聊生活",
+                    traits = listOf("自然得体", "吐槽老板", "聊午饭和周末"),
+                    accentColor = Color(0xFF546E7A),
+                    isSelected = selectedRole == CompanionRole.COLLEAGUE,
+                    onClick = { selectedRole = CompanionRole.COLLEAGUE }
                 )
             }
         }

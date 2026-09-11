@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
 }
@@ -21,10 +22,10 @@ android {
         compose = true
         buildConfig = true
     }
+}
 
-    kotlin {
-        jvmToolchain(17)
-    }
+kotlin {
+    jvmToolchain(17)
 }
 
 dependencies {

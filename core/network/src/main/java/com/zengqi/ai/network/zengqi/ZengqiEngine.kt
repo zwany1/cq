@@ -104,7 +104,7 @@ object ZengqiEngine {
     }
 
     internal fun stylePrompt(stats: String, sampleText: String): String = """
-        以下是一位女生的历史聊天发言片段和统计特征，请分析她的说话风格，只输出 JSON（不要 markdown 代码块），字段：
+        以下是这位人物的历史聊天发言片段和统计特征，请分析TA的说话风格，只输出 JSON（不要 markdown 代码块），字段：
         {"sentence_length": "short/medium/long", "response_length": "short/medium/long", "tone": ["..."], "frequently_used_words": ["..."], "emojis": ["..."], "punctuation_style": {"感叹号": "rare/medium/often", "问句": "rare/medium/often"}, "favorite_phrases": ["..."], "emotion_style": "...", "calling_style": "..."}
 
         统计特征：$stats
