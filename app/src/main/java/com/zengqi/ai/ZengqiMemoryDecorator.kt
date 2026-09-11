@@ -31,23 +31,51 @@ class ZengqiMemoryDecorator(
         val importedCount = importedMessageDao.countForCharacter(companionId)
         if (importedCount == 0) return base
 
+        val zengqiSections = mutableListOf<String>()
+
         val all = characterMemoryDao.getMemoriesForCharacterSync(companionId)
-        if (all.isEmpty()) return base
-
-        val picked = searchMemories(all, query, topK = 3)
-        if (picked.isEmpty()) return base
-
-        val zengqiSection = buildString {
-            append("\n=== 与她有关的记忆 ===\n")
-            picked.forEach { m ->
-                val day = m.eventTime?.let {
-                    java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault())
-                        .toLocalDate().toString()
-                } ?: "时间未知"
-                append("【${m.type}】${m.title}（$day）：${m.content}\n")
+        if (all.isNotEmpty()) {
+            val picked = searchMemories(all, query, topK = 3)
+            if (picked.isNotEmpty()) {
+                zengqiSections += buildString {
+                    append("=== 与TA有关的记忆 ===\n")
+                    picked.forEach { m ->
+                        val day = m.eventTime?.let {
+                            java.time.Instant.ofEpochMilli(it)
+                                .atZone(java.time.ZoneId.systemDefault())
+                                .toLocalDate().toString()
+                        } ?: "时间未知"
+                        append("【${m.type}】${m.title}（$day）：${m.content}\n")
+                    }
+                }
             }
         }
-        return if (base.isBlank()) zengqiSection.trim() else base + zengqiSection
+
+        // TA 的真实发言片段：风格模仿的 few-shot 素材
+        val samples = sampleVoice(companionId)
+        if (samples.isNotEmpty()) {
+            zengqiSections += buildString {
+                append("=== TA的真实发言示例（模仿这个说话方式，不要照抄内容） ===\n")
+                samples.forEach { append("TA：$it\n") }
+            }
+        }
+
+        if (zengqiSections.isEmpty()) return base
+        val zengqi = "\n" + zengqiSections.joinToString("\n")
+        return base + zengqi
+    }
+
+    /**
+     * 取 TA 的代表性发言：优先短句（口语风格最浓），最长 8 条。
+     */
+    private suspend fun sampleVoice(companionId: Long): List<String> {
+        val recent = importedMessageDao.getRecentFromCharacter(companionId, 40)
+        return recent
+            .map { it.content.trim() }
+            .filter { it.length in 2..60 && !it.startsWith("[") }
+            .sortedBy { it.length }
+            .take(8)
+            .reversed()
     }
 
     /**

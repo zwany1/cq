@@ -20,6 +20,12 @@ interface ImportedMessageDao {
     fun getMessagesForCharacter(characterId: Long): Flow<List<ImportedMessageEntity>>
 
     @Query(
+        "SELECT * FROM imported_messages WHERE characterId = :characterId AND isFromCharacter = 1 " +
+            "ORDER BY sentAt DESC LIMIT :limit"
+    )
+    suspend fun getRecentFromCharacter(characterId: Long, limit: Int): List<ImportedMessageEntity>
+
+    @Query(
         "SELECT * FROM imported_messages WHERE characterId = :characterId " +
             "AND sentAt >= :startOfDay AND sentAt < :endOfDay ORDER BY sentAt ASC"
     )

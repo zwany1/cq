@@ -29,8 +29,8 @@ object ZengqiEngine {
     internal const val MEMORY_BATCH_SIZE = 10
 
     /** 风格样本送 LLM 的条数与单条截断长度（控制上下文占用） */
-    internal const val STYLE_SAMPLE_COUNT = 12
-    internal const val STYLE_SAMPLE_MAX_CHARS = 1200
+    internal const val STYLE_SAMPLE_COUNT = 20
+    internal const val STYLE_SAMPLE_MAX_CHARS = 1500
 
     /** 本地向量维度 */
     const val VECTOR_DIM = 256

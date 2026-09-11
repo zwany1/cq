@@ -40,6 +40,11 @@ object ChatFileParser {
 
     private val timeOnly = Regex("""^\d{1,2}:\d{2}(\:\d{2})?\s+""")
 
+    // "小雨 2023-06-18 21:04:32" —— 名字在前、时间在后的导出格式
+    private val nameThenTs = Regex(
+        """^([^\d\s\[][^:：\[]{1,20}?)\s+[\[（(]?\s*(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*[\]）)]?\s+"""
+    )
+
     /**
      * 解析文件内容。无法解析时间戳的行作为上一条消息的续行。
      */
@@ -66,6 +71,24 @@ object ChatFileParser {
                         speakers += sender
                         continue
                     }
+                }
+            }
+
+            // 名字在前、时间在后：正文为时间戳之后的剩余部分
+            val nMatch = nameThenTs.find(line)
+            if (nMatch != null) {
+                val (sender, body, ts) = nMatch.let { m ->
+                    val g = m.groupValues
+                    Triple(
+                        m.groupValues[1].trim().trim('：', ':'),
+                        line.substring(m.range.last + 1).trim(),
+                        toMillis(g[2], g[3], g[4], g[5], g[6], g.getOrNull(7) ?: "0")
+                    )
+                }
+                if (sender.isNotEmpty() && body.isNotEmpty()) {
+                    messages += ParsedChatMessage(sender, body, ts)
+                    speakers += sender
+                    continue
                 }
             }
 
