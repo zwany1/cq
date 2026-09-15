@@ -1,5 +1,6 @@
 package com.zengqi.ai.feature.importchat
 
+import android.app.Application
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -43,9 +44,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -61,11 +64,11 @@ import com.zengqi.ai.domain.model.BuildStatus
 fun ImportChatScreen(
     characterId: Long,
     onNavigateBack: () -> Unit,
-    viewModel: ImportChatViewModel = viewModel(key = "import_chat_$characterId") {
-        val app = LocalContext.current.applicationContext as android.app.Application
-        ImportChatViewModel(app, characterId)
-    }
 ) {
+    val context = LocalContext.current
+    val viewModel: ImportChatViewModel = remember(characterId) {
+        ImportChatViewModel(context.applicationContext as Application, characterId)
+    }
     val state by viewModel.uiState.collectAsState()
 
     val filePicker = rememberLauncherForActivityResult(
@@ -114,7 +117,9 @@ fun ImportChatScreen(
                             .fillMaxWidth()
                             .height(180.dp)
                             .clip(RoundedCornerShape(20.dp))
-                            .clickable { filePicker.launch(arrayOf("text/*", "application/json", "application/csv")) },
+                            .clickable {
+                                filePicker.launch(arrayOf("text/*", "application/json", "application/csv"))
+                            },
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
                         )

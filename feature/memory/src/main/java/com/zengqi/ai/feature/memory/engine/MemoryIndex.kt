@@ -31,13 +31,16 @@ class MemoryIndex {
     fun add(item: MemoryItem) {
         val tokens = MemoryTokenizer.tokenize(item.content)
         tokens.forEach { token ->
-            keywordToIds.getOrPut(token) { ConcurrentHashMap.newKeySet() }.add(item.id)
+            val ids = keywordToIds[token] ?: ConcurrentHashMap.newKeySet<String>().also { keywordToIds[token] = it }
+            ids.add(item.id)
         }
-        categoryToIds.getOrPut(item.category) { ConcurrentHashMap.newKeySet() }.add(item.id)
+        val catIds = categoryToIds[item.category] ?: ConcurrentHashMap.newKeySet<String>().also { categoryToIds[item.category] = it }
+        catIds.add(item.id)
         importanceSorted[item.id] = item.importance
         timeSorted[item.id] = item.timestamp
         item.tags.forEach { tag ->
-            keywordToIds.getOrPut(tag) { ConcurrentHashMap.newKeySet() }.add(item.id)
+            val ids = keywordToIds[tag] ?: ConcurrentHashMap.newKeySet<String>().also { keywordToIds[tag] = it }
+            ids.add(item.id)
         }
     }
 

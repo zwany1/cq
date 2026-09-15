@@ -1,8 +1,14 @@
 package com.zengqi.ai.network.zengqi
 
+import com.zengqi.ai.common.SecureLog
 import com.zengqi.ai.domain.AiServiceProvider
 import com.zengqi.ai.domain.ServiceRegistry
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -25,8 +31,17 @@ object ZengqiEngine {
 
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
-    /** 记忆批量提取时每次送 LLM 的候选片段数 */
-    internal const val MEMORY_BATCH_SIZE = 10
+    /** 记忆批量提取时每次送 LLM 的候选片段数（日期粒度小批，LLM 提取更聚焦） */
+    internal const val MEMORY_BATCH_SIZE = 6
+
+    /** 记忆提取候选片段采样上限：约 2400 个日期的内容，覆盖一年多的日常记录 */
+    internal const val MEMORY_SAMPLE_LIMIT = 400
+
+    /** 记忆提取并发路数 */
+    internal const val MEMORY_EXTRACT_CONCURRENCY = 4
+
+    /** 并发批次间的节流间隔（毫秒），避免触发免费端点限流 */
+    internal const val MEMORY_EXTRACT_THROTTLE_MS = 1500L
 
     /** 风格样本送 LLM 的条数与单条截断长度（控制上下文占用） */
     internal const val STYLE_SAMPLE_COUNT = 20
@@ -202,20 +217,47 @@ object ZengqiEngine {
     """.trimIndent()
 
     /**
-     * 从按日期分组的候选片段提取记忆。LLM 失败抛异常，由导入流程标记 FAILED。
+     * 从按日期分组的候选片段提取记忆。候选超上限时均匀采样封顶；
+     * 批次并发执行，导入耗时为常数级。单批失败跳过该批，不阻断整体。
      */
     suspend fun extractMemories(candidates: List<String>): List<ExtractedMemory> = withContext(Dispatchers.IO) {
-        val all = mutableListOf<ExtractedMemory>()
-        var i = 0
-        while (i < candidates.size) {
-            val chunk = candidates.subList(i, minOf(i + MEMORY_BATCH_SIZE, candidates.size))
-                .joinToString("\n\n")
-            val raw = callLlm(memoryExtractPrompt(chunk), maxTokens = 4000)
-            ensureLlmOutput(raw)
-            all.addAll(parseMemoryList(raw))
-            i += MEMORY_BATCH_SIZE
+        val sampled = sampleCandidates(candidates)
+        val batches = sampled.chunked(MEMORY_BATCH_SIZE)
+        SecureLog.i("ZengqiEngine", "记忆提取: ${candidates.size}个候选, 采样后${sampled.size}, ${batches.size}批, 并发$MEMORY_EXTRACT_CONCURRENCY")
+
+        coroutineScope {
+            batches.mapIndexed { batchIdx, batch ->
+                async {
+                    try {
+                        // 批次间节流：按批次序号错峰发请求，避免并发挤兑限流
+                        if (batchIdx >= MEMORY_EXTRACT_CONCURRENCY) {
+                            delay(((batchIdx / MEMORY_EXTRACT_CONCURRENCY) * MEMORY_EXTRACT_THROTTLE_MS))
+                        }
+                        val chunk = batch.joinToString("\n\n")
+                        val raw = callLlm(memoryExtractPrompt(chunk), maxTokens = 4000)
+                        val parsed = parseMemoryList(raw)
+                        SecureLog.i("ZengqiEngine", "记忆提取单批完成: +${parsed.size}条")
+                        parsed
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        SecureLog.w("ZengqiEngine", "记忆提取单批失败，跳过: ${e.message}")
+                        emptyList()
+                    }
+                }
+            }.awaitAll().flatten()
         }
-        all
+    }
+
+    /**
+     * 候选片段超上限时按步长均匀采样，保留时间跨度上的分布。
+     */
+    internal fun sampleCandidates(candidates: List<String>): List<String> {
+        if (candidates.size <= MEMORY_SAMPLE_LIMIT) return candidates
+        val step = candidates.size.toDouble() / MEMORY_SAMPLE_LIMIT
+        return (0 until MEMORY_SAMPLE_LIMIT).map { i ->
+            candidates[(i * step).toInt().coerceAtMost(candidates.size - 1)]
+        }
     }
 
     internal fun parseMemoryList(raw: String): List<ExtractedMemory> {
@@ -315,21 +357,21 @@ object ZengqiEngine {
     // ── LLM 调用 ──
 
     /**
-     * callGeneration 在无可用 API/失败时返回固定提示文案而不抛异常，这里显式拦截，
-     * 避免把提示文案当 JSON 解析产生垃圾记忆。
+     * 校验 LLM 返回内容。reasoning 模型可能返回纯文本思考过程，
+     * 只要包含可提取的 JSON 片段即可。
      */
     private fun ensureLlmOutput(raw: String) {
         if (raw.isBlank()) {
             throw IllegalStateException("AI 未返回内容，请检查 API 配置")
-        }
-        if (!raw.trimStart().startsWith("{") && !raw.trimStart().startsWith("[")) {
-            throw IllegalStateException("AI 返回异常：${raw.take(80)}")
         }
     }
 
     private suspend fun callLlm(prompt: String, maxTokens: Int): String {
         val ai = ServiceRegistry.get(AiServiceProvider::class.java)
             ?: throw IllegalStateException("AI 服务未注册")
-        return ai.callGeneration(prompt, maxTokens)
+        SecureLog.i("ZengqiEngine", "callLlm开始, maxTokens=$maxTokens, prompt长度=${prompt.length}")
+        val result = ai.callGeneration(prompt, maxTokens)
+        SecureLog.i("ZengqiEngine", "callLlm返回, 长度=${result.length}, 前200字=${result.take(200)}")
+        return result
     }
 }

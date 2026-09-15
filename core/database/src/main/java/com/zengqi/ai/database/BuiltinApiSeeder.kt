@@ -26,7 +26,7 @@ object BuiltinApiSeeder {
                 S0
             )
             if (repository.getAllConfiguredConfigs().first().isNotEmpty()) return@withContext
-            repository.saveConfig(
+            val configId = repository.saveConfig(
                 ApiConfig(
                     provider = ApiProvider.TOKENROUTER,
                     name = "内置模型",
@@ -35,7 +35,9 @@ object BuiltinApiSeeder {
                     model = ApiProvider.TOKENROUTER.defaultModel
                 )
             )
-            SecureLog.i(TAG, "内置 TokenRouter 配置已写入")
+            repository.disableOtherConfigs(configId)
+            repository.enableConfig(configId)
+            SecureLog.i(TAG, "内置 TokenRouter 配置已写入并激活, id=$configId")
         } catch (e: SQLiteException) {
             SecureLog.e(TAG, "内置配置写入失败", e)
         }

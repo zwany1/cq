@@ -336,6 +336,17 @@ class AiService(context: Context) : AiServiceProvider {
                 .build()
         }
 
+        // 生成类调用（风格分析/记忆提取）prompt 大、reasoning 模型生成慢，
+        // readTimeout 放宽到 120s，避免长 prompt 下读超时导致"AI 未返回内容"。
+        private val generationHttpClient: OkHttpClient by lazy {
+            OkHttpClient.Builder()
+                .connectTimeout(TimeoutBudgets.HTTP_CONNECT_MS, TimeUnit.MILLISECONDS)
+                .readTimeout(120, TimeUnit.SECONDS)
+                .writeTimeout(TimeoutBudgets.HTTP_WRITE_MS, TimeUnit.MILLISECONDS)
+                .retryOnConnectionFailure(true)
+                .build()
+        }
+
         // [M9 FIX] 视觉请求专用客户端单例（图片上传大 body，需更长 writeTimeout）
         private val visionHttpClient: OkHttpClient by lazy {
             OkHttpClient.Builder()
@@ -696,14 +707,20 @@ class AiService(context: Context) : AiServiceProvider {
         temperature: Double,
         maxTokens: Int
     ): String {
+        return callOpenAiCompatibleLight(config, messages, temperature, maxTokens, generationHttpClient)
+    }
+
+    private suspend fun callOpenAiCompatibleLight(
+        config: ApiConfig,
+        messages: List<Message>,
+        temperature: Double,
+        maxTokens: Int,
+        lightClient: OkHttpClient
+    ): String {
         val baseUrl = normalizeOpenAiBaseUrl(config.baseUrl)
         val url = "${baseUrl.trimEnd('/')}/chat/completions"
         val allKeys = resolveKeysWithPartnerFallback(config).second
         var lastException: Exception? = null
-
-        // [M9 FIX] 复用轻量客户端单例：原每次调用 getEffectiveClient(config).newBuilder().build()
-        // 创建新 OkHttpClient，虽共享连接池但新建 dispatcher + 拦截器链。Judge/Generation 调用频繁有开销。
-        val lightClient = lightHttpClient
 
         for (keyIndex in allKeys.indices) {
             val currentKey = allKeys[keyIndex]
@@ -752,7 +769,8 @@ class AiService(context: Context) : AiServiceProvider {
                 if (parsed.error != null) throw Exception(parsed.error.message ?: "API error")
 
                 SecureLog.api("LIGHT", "Key ${keyIndex + 1}/${allKeys.size} success!")
-                return parsed.choices?.firstOrNull()?.message?.content ?: ""
+                val msg = parsed.choices?.firstOrNull()?.message
+                return msg?.content ?: msg?.reasoning_content ?: ""
             } catch (e: java.net.SocketTimeoutException) {
                 lastException = e
                 SecureLog.w("AiService", "Light call Key ${keyIndex + 1}/${allKeys.size} timeout: ${e.message}")

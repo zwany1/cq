@@ -435,20 +435,19 @@ class MemoryManager private constructor(
                 )
 
                 // 添加到短期记忆
-                shortTermCache.computeIfAbsent(key) { mutableListOf() }
-                    .let { items ->
-                        synchronized(items) {
-                            items.add(item)
-                            // 超容量时晋级最旧的到中期
-                            if (items.size > SHORT_TERM_MAX_PER_SCOPE) {
-                                val toPromote = items.removeAt(0)
-                                promoteToMid(scope, sourceId, toPromote)
-                            }
-                        }
+                val items = shortTermCache[key] ?: mutableListOf<MemoryItem>().also { shortTermCache[key] = it }
+                synchronized(items) {
+                    items.add(item)
+                    // 超容量时晋级最旧的到中期
+                    if (items.size > SHORT_TERM_MAX_PER_SCOPE) {
+                        val toPromote = items.removeAt(0)
+                        promoteToMid(scope, sourceId, toPromote)
                     }
+                }
 
                 // 更新索引
-                indexCache.computeIfAbsent(key) { MemoryIndex() }.add(item)
+                val index = indexCache[key] ?: MemoryIndex().also { indexCache[key] = it }
+                index.add(item)
 
                 // 同步到全局池（如果符合条件）
                 if (scope != MemoryScope.GLOBAL && shouldSyncToGlobal(category, importance)) {
@@ -512,11 +511,10 @@ class MemoryManager private constructor(
         )
 
         val globalKey = scopeKey(MemoryScope.GLOBAL, 0L)
-        shortTermCache.computeIfAbsent(globalKey) { mutableListOf() }
-            .let { items ->
-                synchronized(items) { items.add(globalItem) }
-            }
-        indexCache.computeIfAbsent(globalKey) { MemoryIndex() }.add(globalItem)
+        val items = shortTermCache[globalKey] ?: mutableListOf<MemoryItem>().also { shortTermCache[globalKey] = it }
+        synchronized(items) { items.add(globalItem) }
+        val globalIndex = indexCache[globalKey] ?: MemoryIndex().also { indexCache[globalKey] = it }
+        globalIndex.add(globalItem)
         schedulePersist(MemoryScope.GLOBAL, 0L)
     }
 
@@ -529,10 +527,8 @@ class MemoryManager private constructor(
             tier = MemoryTier.MID,
             expireAt = null
         )
-        midTermCache.computeIfAbsent(key) { mutableListOf() }
-            .let { items ->
-                synchronized(items) { items.add(promoted) }
-            }
+        val items = midTermCache[key] ?: mutableListOf<MemoryItem>().also { midTermCache[key] = it }
+        synchronized(items) { items.add(promoted) }
         schedulePersist(scope, id)
     }
 
@@ -554,7 +550,8 @@ class MemoryManager private constructor(
         store.saveTier(scope, id, MemoryTier.LONG, longItems)
 
         // 更新长期索引
-        longTermIndex.computeIfAbsent(key) { MemoryIndex() }.add(promoted)
+        val longIndex = longTermIndex[key] ?: MemoryIndex().also { longTermIndex[key] = it }
+        longIndex.add(promoted)
         indexCache[key]?.add(promoted)
 
         schedulePersist(scope, id)

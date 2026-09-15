@@ -41,7 +41,8 @@ class ApiConfigRepository(
     suspend fun getActiveEnabledConfig(): ApiConfig? =
         apiConfigDao.getActiveEnabledConfig()?.let { decryptAndMigrateIfNeeded(it) }
 
-    suspend fun saveConfig(config: ApiConfig) = apiConfigDao.insertConfig(encryptForStorage(config, secretCodec))
+    suspend fun saveConfig(config: ApiConfig): Long =
+        apiConfigDao.insertConfig(encryptForStorage(config, secretCodec))
 
     suspend fun updateConfig(config: ApiConfig) = apiConfigDao.updateConfig(encryptForStorage(config, secretCodec))
 
