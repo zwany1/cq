@@ -991,7 +991,15 @@ class ChatViewModel(
                     SecureLog.i("ChatViewModel", "STT recognition success: ${recognizedText.take(50)}...")
                     sendMessage(recognizedText)
                 } else {
-                    SecureLog.w("ChatViewModel", "STT recognition failed or empty, voice tag sent only")
+                    // STT 失败时仍触发 AI 对话：历史里已含 [语音] 消息，TA 会自然回应
+                    SecureLog.w("ChatViewModel", "STT recognition failed or empty, asking AI to respond to voice message")
+                    turnState.reset()
+                    turnState.sendMessageJob = chatBackgroundScope.startAiResponse(
+                        history = contextResolver.getHistoryForAi(companionId),
+                        stickerProbability = 0,
+                        userContentForMemory = "[语音]",
+                        ntpTimeEnabled = false
+                    )
                 }
             } catch (e: Exception) {
                 SecureLog.e("ChatViewModel", "sendVoiceMessage failed", e)
