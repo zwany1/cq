@@ -78,6 +78,7 @@ enum class ApiProvider(val displayName: String, val defaultBaseUrl: String, val 
     OPENROUTER("OpenRouter", "https://openrouter.ai/api/v1/", "openai/gpt-4o-mini"),
     GROQ("Groq", "https://api.groq.com/openai/v1/", "llama-3.1-8b-instant"),
     TOKENROUTER("TokenRouter", "https://api.tokenrouter.com/v1/", "z-ai/glm-5.3-free"),
+    SENSEAUDIO("SenseAudio", "https://api.senseaudio.cn/v1/", "glm-5.3-flash"),
     PARTNER("自定义中继", "", ""),
     CUSTOM("自定义 API", "", ""),
     IFLYTEK("讯飞星火", "https://spark-api-open.xf-yun.com/v1/", "generalv3.5")

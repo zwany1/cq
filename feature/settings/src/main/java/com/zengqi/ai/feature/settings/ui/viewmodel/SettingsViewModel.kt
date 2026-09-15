@@ -611,6 +611,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     ApiProvider.OPENROUTER,
                     ApiProvider.GROQ,
                     ApiProvider.TOKENROUTER,
+                    ApiProvider.SENSEAUDIO,
                     ApiProvider.CUSTOM,
                     ApiProvider.IFLYTEK,
                     ApiProvider.PARTNER -> aiService.callOpenAiCompatibleForTest(testConfig, testMessages)

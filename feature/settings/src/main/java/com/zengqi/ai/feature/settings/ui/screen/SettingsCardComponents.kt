@@ -177,6 +177,7 @@ private fun providerInitials(provider: ApiProvider): Triple<String, Color, Color
         ApiProvider.OPENROUTER -> Triple("OR", Color(0xFF7B68EE), Color.White)
         ApiProvider.GROQ -> Triple("G", Color(0xFFF4845F), Color.White)
         ApiProvider.TOKENROUTER -> Triple("T", Color(0xFF0EA5E9), Color.White)
+        ApiProvider.SENSEAUDIO -> Triple("S", Color(0xFF8B5CF6), Color.White)
         ApiProvider.PARTNER -> Triple("C", Color(0xFFFF69B4), Color.White)
         ApiProvider.CUSTOM -> Triple("?", Color(0xFF888888).copy(alpha = 0.15f), Color(0xFF888888))
     }

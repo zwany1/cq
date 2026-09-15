@@ -519,7 +519,7 @@ class AiService(context: Context) : AiServiceProvider {
 
                 try {
                     val (rawResponse, reasoning) = when (config.provider) {
-                        ApiProvider.OPENAI, ApiProvider.DEEPSEEK, ApiProvider.DASHSCOPE, ApiProvider.KIMI, ApiProvider.GEMINI, ApiProvider.XIAOMI, ApiProvider.ZHIPU, ApiProvider.SILICONFLOW, ApiProvider.OPENROUTER, ApiProvider.GROQ, ApiProvider.CUSTOM, ApiProvider.IFLYTEK, ApiProvider.TOKENROUTER, ApiProvider.PARTNER -> {
+                        ApiProvider.OPENAI, ApiProvider.DEEPSEEK, ApiProvider.DASHSCOPE, ApiProvider.KIMI, ApiProvider.GEMINI, ApiProvider.XIAOMI, ApiProvider.ZHIPU, ApiProvider.SILICONFLOW, ApiProvider.OPENROUTER, ApiProvider.GROQ, ApiProvider.CUSTOM, ApiProvider.IFLYTEK, ApiProvider.TOKENROUTER, ApiProvider.SENSEAUDIO, ApiProvider.PARTNER -> {
                             callOpenAiCompatibleWithReasoning(config, messages)
                         }
                         ApiProvider.ANTHROPIC -> {
@@ -580,7 +580,7 @@ class AiService(context: Context) : AiServiceProvider {
 
             try {
                 val rawResponse = when (config.provider) {
-                    ApiProvider.OPENAI, ApiProvider.DEEPSEEK, ApiProvider.DASHSCOPE, ApiProvider.KIMI, ApiProvider.GEMINI, ApiProvider.XIAOMI, ApiProvider.ZHIPU, ApiProvider.SILICONFLOW, ApiProvider.OPENROUTER, ApiProvider.GROQ, ApiProvider.CUSTOM, ApiProvider.IFLYTEK, ApiProvider.TOKENROUTER, ApiProvider.PARTNER -> {
+                    ApiProvider.OPENAI, ApiProvider.DEEPSEEK, ApiProvider.DASHSCOPE, ApiProvider.KIMI, ApiProvider.GEMINI, ApiProvider.XIAOMI, ApiProvider.ZHIPU, ApiProvider.SILICONFLOW, ApiProvider.OPENROUTER, ApiProvider.GROQ, ApiProvider.CUSTOM, ApiProvider.IFLYTEK, ApiProvider.TOKENROUTER, ApiProvider.SENSEAUDIO, ApiProvider.PARTNER -> {
                         callOpenAiCompatible(config, messages)
                     }
                     ApiProvider.ANTHROPIC -> {
@@ -640,7 +640,7 @@ class AiService(context: Context) : AiServiceProvider {
 
                 try {
                     val rawResponse = when (config.provider) {
-                        ApiProvider.OPENAI, ApiProvider.DEEPSEEK, ApiProvider.DASHSCOPE, ApiProvider.KIMI, ApiProvider.GEMINI, ApiProvider.XIAOMI, ApiProvider.ZHIPU, ApiProvider.SILICONFLOW, ApiProvider.OPENROUTER, ApiProvider.GROQ, ApiProvider.CUSTOM, ApiProvider.IFLYTEK, ApiProvider.TOKENROUTER, ApiProvider.PARTNER -> {
+                        ApiProvider.OPENAI, ApiProvider.DEEPSEEK, ApiProvider.DASHSCOPE, ApiProvider.KIMI, ApiProvider.GEMINI, ApiProvider.XIAOMI, ApiProvider.ZHIPU, ApiProvider.SILICONFLOW, ApiProvider.OPENROUTER, ApiProvider.GROQ, ApiProvider.CUSTOM, ApiProvider.IFLYTEK, ApiProvider.TOKENROUTER, ApiProvider.SENSEAUDIO, ApiProvider.PARTNER -> {
                             callOpenAiCompatible(config, messages)
                         }
                         ApiProvider.ANTHROPIC -> {
@@ -1857,7 +1857,7 @@ $chatText
                     val visionClient = visionHttpClient
 
                     val rawResponse = when (config.provider) {
-                        ApiProvider.OPENAI, ApiProvider.DEEPSEEK, ApiProvider.DASHSCOPE, ApiProvider.KIMI, ApiProvider.GEMINI, ApiProvider.XIAOMI, ApiProvider.ZHIPU, ApiProvider.SILICONFLOW, ApiProvider.OPENROUTER, ApiProvider.GROQ, ApiProvider.CUSTOM, ApiProvider.IFLYTEK, ApiProvider.TOKENROUTER, ApiProvider.PARTNER -> {
+                        ApiProvider.OPENAI, ApiProvider.DEEPSEEK, ApiProvider.DASHSCOPE, ApiProvider.KIMI, ApiProvider.GEMINI, ApiProvider.XIAOMI, ApiProvider.ZHIPU, ApiProvider.SILICONFLOW, ApiProvider.OPENROUTER, ApiProvider.GROQ, ApiProvider.CUSTOM, ApiProvider.IFLYTEK, ApiProvider.TOKENROUTER, ApiProvider.SENSEAUDIO, ApiProvider.PARTNER -> {
                             callOpenAiCompatibleVision(config, sortedHistory, systemPrompt, lastUserMessage, imageBase64, mimeType, visionClient)
                         }
                         ApiProvider.ANTHROPIC -> {
@@ -2238,7 +2238,7 @@ $chatText
                 try {
                     val toolsJson = com.zengqi.ai.domain.ToolRegistry.toolDefinitionsJson()
                     val result = when (config.provider) {
-                        ApiProvider.OPENAI, ApiProvider.DEEPSEEK, ApiProvider.DASHSCOPE, ApiProvider.KIMI, ApiProvider.GEMINI, ApiProvider.XIAOMI, ApiProvider.ZHIPU, ApiProvider.SILICONFLOW, ApiProvider.OPENROUTER, ApiProvider.GROQ, ApiProvider.CUSTOM, ApiProvider.IFLYTEK, ApiProvider.TOKENROUTER, ApiProvider.PARTNER -> {
+                        ApiProvider.OPENAI, ApiProvider.DEEPSEEK, ApiProvider.DASHSCOPE, ApiProvider.KIMI, ApiProvider.GEMINI, ApiProvider.XIAOMI, ApiProvider.ZHIPU, ApiProvider.SILICONFLOW, ApiProvider.OPENROUTER, ApiProvider.GROQ, ApiProvider.CUSTOM, ApiProvider.IFLYTEK, ApiProvider.TOKENROUTER, ApiProvider.SENSEAUDIO, ApiProvider.PARTNER -> {
                             callOpenAiCompatibleWithTools(config, messages, toolsJson)
                         }
                         ApiProvider.ANTHROPIC -> {
@@ -2405,7 +2405,7 @@ $chatText
 
         try {
             val rawResponse = when (config.provider) {
-                ApiProvider.OPENAI, ApiProvider.DEEPSEEK, ApiProvider.DASHSCOPE, ApiProvider.KIMI, ApiProvider.GEMINI, ApiProvider.XIAOMI, ApiProvider.ZHIPU, ApiProvider.SILICONFLOW, ApiProvider.OPENROUTER, ApiProvider.GROQ, ApiProvider.CUSTOM, ApiProvider.IFLYTEK, ApiProvider.TOKENROUTER, ApiProvider.PARTNER -> {
+                ApiProvider.OPENAI, ApiProvider.DEEPSEEK, ApiProvider.DASHSCOPE, ApiProvider.KIMI, ApiProvider.GEMINI, ApiProvider.XIAOMI, ApiProvider.ZHIPU, ApiProvider.SILICONFLOW, ApiProvider.OPENROUTER, ApiProvider.GROQ, ApiProvider.CUSTOM, ApiProvider.IFLYTEK, ApiProvider.TOKENROUTER, ApiProvider.SENSEAUDIO, ApiProvider.PARTNER -> {
                     callOpenAiCompatible(config, messages)
                 }
                 ApiProvider.ANTHROPIC -> {
