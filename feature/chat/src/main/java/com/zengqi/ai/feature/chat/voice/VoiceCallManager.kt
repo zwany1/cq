@@ -118,7 +118,9 @@ class VoiceCallManager(private val context: Context) {
                 enableEndpoint = true
             )
 
-            recognizer = OnlineRecognizer(context.assets, config)
+            // 模型已复制到 filesDir（绝对路径），assetManager 必须传 null，
+            // 否则 sherpa native 层走 assets 读取路径，读不到即 fatal abort 闪退。
+            recognizer = OnlineRecognizer(null, config)
             initialized = true
             SecureLog.i(TAG, "✅ sherpa-onnx OnlineRecognizer 初始化成功 (v1.13.3)")
         } catch (e: Exception) {
