@@ -19,27 +19,44 @@ class AndroidTtsProvider : TtsProviderInterface {
     @Volatile private var ready: Boolean = false
 
     override suspend fun synthesize(context: Context, text: String, voiceId: String?): String? {
-        // [P2 REVIEW FIX] synthesize 的 deferred.await() 无超时，若 TTS 回调丢失会永久挂起。
-        // 包 withTimeoutOrNull 防泄漏（超时返回 null，调用方已有 null 处理逻辑）。
+        // 合成到临时文件并返回路径，由调用方 MediaPlayer 按
+        // USAGE_VOICE_COMMUNICATION / 媒体流路由播放（直接 speak() 的音频流与通话设备冲突）。
         return withTimeoutOrNull(TimeoutBudgets.TTS_SYNTH_MS) {
             val t = tts ?: return@withTimeoutOrNull null
-            val deferred = CompletableDeferred<Unit>()
+            val deferred = CompletableDeferred<Int>()
+
+            val outFile = java.io.File(
+                context.cacheDir,
+                "tts_synthesis/tts_${System.currentTimeMillis()}.wav"
+            )
+            outFile.parentFile?.mkdirs()
 
             try {
                 t.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onStart(utteranceId: String?) {}
-                    override fun onDone(utteranceId: String?) { deferred.complete(Unit) }
+                    override fun onDone(utteranceId: String?) { deferred.complete(TextToSpeech.SUCCESS) }
                     @Deprecated("Deprecated in Java")
-                    override fun onError(utteranceId: String?) { deferred.complete(Unit) }
+                    override fun onError(utteranceId: String?) { deferred.complete(TextToSpeech.ERROR) }
                 })
                 t.setSpeechRate(1.0f)
                 t.setPitch(1.0f)
-                t.speak(text, TextToSpeech.QUEUE_FLUSH, null, "tts_${System.currentTimeMillis()}")
+                val result = t.synthesizeToFile(text, null, outFile, "tts_${System.currentTimeMillis()}")
+                if (result != TextToSpeech.SUCCESS) {
+                    SecureLog.e("AndroidTTS", "synthesizeToFile enqueue failed: $result")
+                    return@withTimeoutOrNull null
+                }
                 deferred.await()
             } catch (e: Exception) {
-                SecureLog.e("AndroidTTS", "speak error", e)
+                SecureLog.e("AndroidTTS", "synthesize error", e)
+                return@withTimeoutOrNull null
             }
-            null
+
+            if (deferred.isCompleted && outFile.exists() && outFile.length() > 0) {
+                outFile.absolutePath
+            } else {
+                outFile.delete()
+                null
+            }
         }
     }
 
