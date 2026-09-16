@@ -512,34 +512,32 @@ fun VoiceCallScreen(
                 CallState.ENDED -> {}
             }
 
-            Spacer(modifier = Modifier.weight(0.2f))
-
-            // 头像
-            Box(modifier = Modifier.size(140.dp), contentAlignment = Alignment.Center) {
-                if (callState == CallState.CONNECTED) {
-                    PulsingGlowRing(modifier = Modifier.size(180.dp), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
-                    PulsingGlowRing(modifier = Modifier.size(220.dp), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), delayMillis = 500)
+            // 头像：摄像头开启时缩为画中画悬浮右上角；关闭时居中大图
+            if (isCameraEnabled && callState == CallState.CONNECTED) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    LivingAvatar(
+                        avatarUrl = companionData?.avatarUrl,
+                        fallbackText = companionData?.name?.firstOrNull()?.toString() ?: "?",
+                        isSpeaking = isAiSpeaking,
+                        size = 96.dp,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 96.dp, end = 24.dp)
+                    )
                 }
-                Box(
-                    modifier = Modifier.size(140.dp).clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (companionData?.avatarUrl != null) {
-                        AsyncImage(
-                            model = companionData?.avatarUrl,
-                            contentDescription = companionData?.name,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Text(
-                            text = companionData?.name?.firstOrNull()?.toString() ?: "?",
-                            fontSize = 48.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+            } else {
+                Spacer(modifier = Modifier.weight(0.2f))
+                Box(modifier = Modifier.size(140.dp), contentAlignment = Alignment.Center) {
+                    if (callState == CallState.CONNECTED) {
+                        PulsingGlowRing(modifier = Modifier.size(180.dp), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                        PulsingGlowRing(modifier = Modifier.size(220.dp), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), delayMillis = 500)
                     }
+                    LivingAvatar(
+                        avatarUrl = companionData?.avatarUrl,
+                        fallbackText = companionData?.name?.firstOrNull()?.toString() ?: "?",
+                        isSpeaking = isAiSpeaking,
+                        size = 140.dp
+                    )
                 }
             }
 
