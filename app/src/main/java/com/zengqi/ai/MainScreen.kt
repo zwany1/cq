@@ -318,6 +318,7 @@ fun MainScreen(mainActivity: Activity) {
                             onNavigateBack = { navController.popBackStack() },
                             onNavigateToDetail = { navController.navigate("chat_detail/$it") },
                             onNavigateToVoiceCall = { navController.navigate("voice_call/$it") },
+                            onNavigateToVideoCall = { navController.navigate("video_call/$it") },
                             onOpenThatDay = { showThatDaySheet = true },
                             onOpenMemory = { showMemorySheet = true }
                         )
@@ -353,6 +354,14 @@ fun MainScreen(mainActivity: Activity) {
                 composable(MainRoute.VoiceCall(0).route.replace("0", "{companionId}"), arguments = listOf(navArgument("companionId") { type = NavType.LongType })) { backStackEntry ->
                     val callCompanionId = backStackEntry.arguments?.getLong("companionId") ?: 0L
                     VoiceCallScreen(companionId = callCompanionId, onNavigateBack = { navController.popBackStack() })
+                }
+                composable(MainRoute.VideoCall(0).route.replace("0", "{companionId}"), arguments = listOf(navArgument("companionId") { type = NavType.LongType })) { backStackEntry ->
+                    val callCompanionId = backStackEntry.arguments?.getLong("companionId") ?: 0L
+                    VoiceCallScreen(
+                        companionId = callCompanionId,
+                        onNavigateBack = { navController.popBackStack() },
+                        videoEnabled = true
+                    )
                 }
 
                 // === 群聊 ===

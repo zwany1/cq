@@ -38,6 +38,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CallEnd
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material.icons.filled.VideocamOff
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -114,7 +116,8 @@ enum class AudioOutput {
 @Composable
 fun VoiceCallScreen(
     companionId: Long,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    videoEnabled: Boolean = false
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -141,6 +144,18 @@ fun VoiceCallScreen(
     var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
     var currentAiJob by remember { mutableStateOf<Job?>(null) }
 
+    // ── 视频 ──
+    var isCameraEnabled by remember { mutableStateOf(videoEnabled) }
+    val hasCameraPermission = ContextCompat.checkSelfPermission(
+        context, Manifest.permission.CAMERA
+    ) == PackageManager.PERMISSION_GRANTED
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) isCameraEnabled = true
+        else scope.launch { snackbarHostState.showSnackbar("需要相机权限才能开启视频") }
+    }
+
     // ── 权限 ──
     var hasAudioPermission by remember {
         mutableStateOf(
@@ -161,6 +176,9 @@ fun VoiceCallScreen(
     LaunchedEffect(Unit) {
         if (!hasAudioPermission) {
             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        }
+        if (videoEnabled && !hasCameraPermission) {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
@@ -421,8 +439,14 @@ fun VoiceCallScreen(
 
     // ── UI ──
     Box(modifier = Modifier.fillMaxSize()) {
-        // 流动渐变背景
-        FlowingGradientBackground()
+        // 视频开启时用前置摄像头预览做背景，否则流动渐变
+        if (isCameraEnabled) {
+            CameraPreviewOverlay(
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            FlowingGradientBackground()
+        }
 
         Column(
             modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp),
@@ -617,6 +641,21 @@ fun VoiceCallScreen(
                     ) {
                         Icon(Icons.Filled.CallEnd, "挂断", tint = Color.White, modifier = Modifier.size(32.dp))
                     }
+                    // 摄像头
+                    CallControlButton(
+                        icon = if (isCameraEnabled) Icons.Filled.Videocam else Icons.Filled.VideocamOff,
+                        label = if (isCameraEnabled) "视频已开" else "视频已关",
+                        isActive = isCameraEnabled,
+                        onClick = {
+                            if (!isCameraEnabled &&
+                                ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                            } else {
+                                isCameraEnabled = !isCameraEnabled
+                            }
+                        }
+                    )
                     // 扬声器
                     CallControlButton(
                         icon = Icons.Filled.VolumeUp,

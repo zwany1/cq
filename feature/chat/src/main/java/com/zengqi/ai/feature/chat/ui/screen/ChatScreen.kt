@@ -149,6 +149,7 @@ fun ChatScreen(
     onNavigateBack: () -> Unit,
     onNavigateToDetail: (Long) -> Unit = {},
     onNavigateToVoiceCall: (Long) -> Unit = {},
+    onNavigateToVideoCall: (Long) -> Unit = {},
     onOpenThatDay: (Long) -> Unit = {},
     onOpenMemory: (Long) -> Unit = {}
 ) {
@@ -272,6 +273,19 @@ fun ChatScreen(
         pendingLocationAction = null
     }
     var showLocationPicker by remember { mutableStateOf(false) }
+
+    // Video call permission launcher with pending action
+    var pendingVideoAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val videoPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted: Boolean ->
+        if (granted) {
+            pendingVideoAction?.invoke()
+        } else {
+            scope.launch { snackbarHostState.showSnackbar("需要相机权限才能视频通话") }
+        }
+        pendingVideoAction = null
+    }
 
     // Video picker for album
     val videoPickerLauncher = rememberLauncherForActivityResult(
@@ -724,11 +738,23 @@ fun ChatScreen(
                         cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
                     },
                     onVideoCallClick = {
-                        if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                            onNavigateToVoiceCall(companionId)
-                        } else {
-                            pendingAudioAction = { onNavigateToVoiceCall(companionId) }
-                            audioPermissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
+                        val audioOk = androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                        val cameraOk = androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                        when {
+                            audioOk && cameraOk -> {
+                                showExtensionPanel = false
+                                onNavigateToVideoCall(companionId)
+                            }
+                            audioOk -> {
+                                showExtensionPanel = false
+                                pendingVideoAction = { onNavigateToVideoCall(companionId) }
+                                videoPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+                            }
+                            else -> {
+                                showExtensionPanel = false
+                                pendingVideoAction = { onNavigateToVideoCall(companionId) }
+                                audioPermissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
+                            }
                         }
                     },
                     onLocationClick = {

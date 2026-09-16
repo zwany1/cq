@@ -16,6 +16,7 @@ sealed class MainRoute(val route: String) {
     data class Chat(val companionId: Long) : MainRoute("chat/$companionId")
     data class ChatDetail(val companionId: Long) : MainRoute("chat_detail/$companionId")
     data class VoiceCall(val companionId: Long) : MainRoute("voice_call/$companionId")
+    data class VideoCall(val companionId: Long) : MainRoute("video_call/$companionId")
 
     // === 伴侣 ===
     object CreateCompanion : MainRoute("create")
@@ -83,6 +84,7 @@ sealed class MainRoute(val route: String) {
             route?.startsWith("chat/") == true -> Chat(route.removePrefix("chat/").toLongOrNull() ?: 0L)
             route?.startsWith("chat_detail/") == true -> ChatDetail(route.removePrefix("chat_detail/").toLongOrNull() ?: 0L)
             route?.startsWith("voice_call/") == true -> VoiceCall(route.removePrefix("voice_call/").toLongOrNull() ?: 0L)
+            route?.startsWith("video_call/") == true -> VideoCall(route.removePrefix("video_call/").toLongOrNull() ?: 0L)
             route?.startsWith("edit/") == true -> EditCompanion(route.removePrefix("edit/").toLongOrNull() ?: 0L)
             route?.startsWith("import_chat/") == true -> ImportChat(route.removePrefix("import_chat/").toLongOrNull() ?: 0L)
             else -> Home
