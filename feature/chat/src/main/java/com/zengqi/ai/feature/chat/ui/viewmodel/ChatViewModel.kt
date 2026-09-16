@@ -869,6 +869,7 @@ class ChatViewModel(
     ).apply {
         // 注入 companionInfoProvider，让 Finalizer 能取到当前 companion 数据用于追问
         companionInfoProvider = { _companionData.value?.toAiCompanionInfo() }
+        contextProvider = { application.applicationContext }
     }
 
     /**

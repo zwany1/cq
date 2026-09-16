@@ -85,7 +85,29 @@ class AiResponseFinalizer(
         }
 
         val settings = chatDetailSettingsStore.getSettings(companionId)
-        val processedText = TextProcessor.processStickerTagsForSplit(aiContent, stickerManager, settings.stickerProbability) { sendStickerMessage(it) }
+        val processedText = TextProcessor.processStickerTagsForSplit(aiContent, stickerManager, settings.stickerProbability, { sendStickerMessage(it) }) { selfiePrompt ->
+            // AI 请求发自拍：生图并发 IMAGE 消息
+            val info = companionInfoProvider?.invoke()
+            val appContext = contextProvider?.invoke()
+            if (info != null && appContext != null) {
+                com.zengqi.ai.feature.chat.ui.viewmodel.SelfieService.generateAndSend(
+                    context = appContext,
+                    companionId = companionId,
+                    companionName = info.name,
+                    prompt = selfiePrompt
+                ) { content, imagePath ->
+                    val selfieMessage = com.zengqi.ai.database.model.ChatMessage(
+                        companionId = companionId,
+                        content = content,
+                        isFromUser = false,
+                        timestamp = System.currentTimeMillis(),
+                        type = com.zengqi.ai.database.model.MessageType.IMAGE,
+                        linkString = imagePath
+                    )
+                    chatRepository.sendMessageAndGetId(selfieMessage)
+                }
+            }
+        }
 
         // L1+L2特征提取 → 贝叶斯模型输出校验（协程上下文执行，避免 JNI 死锁）
         // fail-closed: 超时视为高危拦截
@@ -351,4 +373,6 @@ class AiResponseFinalizer(
 
     // companionInfoProvider 由 ChatViewModel 注入，用于 triggerFollowUp 获取当前 companion 数据
     var companionInfoProvider: (() -> com.zengqi.ai.domain.AiCompanionInfo?)? = null
+    // contextProvider 由 ChatViewModel 注入，供 SelfieService 取 cacheDir
+    var contextProvider: (() -> android.content.Context)? = null
 }

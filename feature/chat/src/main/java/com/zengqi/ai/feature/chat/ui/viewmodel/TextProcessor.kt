@@ -14,6 +14,7 @@ object TextProcessor {
     private val STICKER_FILE_REGEX = Regex("\\bsticker_\\w+\\.png\\b", RegexOption.IGNORE_CASE)
     private val MULTI_NEWLINE_REGEX = Regex("\\n{2,}")
     private val SYSTEM_TAGS = setOf("语音", "图片", "视频", "文件", "位置", "红包", "转账")
+    private val SELFIE_REGEX = Regex("\\[自拍[:：]\\s*([^\\[\\]]+?)\\])")
 
     /**
      * 去除文本中的局部重复子串
@@ -207,9 +208,19 @@ object TextProcessor {
         text: String,
         stickerManager: StickerManager,
         stickerProbability: Int,
-        sendStickerMessage: suspend (StickerInfo) -> Long
+        sendStickerMessage: suspend (StickerInfo) -> Long,
+        sendSelfie: suspend (prompt: String) -> Unit = {}
     ): String {
         val sentStickers = mutableListOf<StickerInfo>()
+
+        // 自拍标记：[自拍: 描述] → 交给生图服务
+        val selfieMatch = SELFIE_REGEX.find(text)
+        if (selfieMatch != null) {
+            val prompt = selfieMatch.groupValues[1].trim()
+            if (prompt.isNotEmpty()) {
+                sendSelfie(prompt)
+            }
+        }
 
         // 模式1：解析AI输出的 [描述] 标记（在原始 text 上匹配）
         val matches = STICKER_REGEX.findAll(text).toList()
