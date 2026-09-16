@@ -259,6 +259,20 @@ fun ChatScreen(
         pendingAudioAction = null
     }
 
+    // Location permission launcher with pending action
+    var pendingLocationAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted: Boolean ->
+        if (granted) {
+            pendingLocationAction?.invoke()
+        } else {
+            scope.launch { snackbarHostState.showSnackbar("需要定位权限才能分享位置") }
+        }
+        pendingLocationAction = null
+    }
+    var showLocationPicker by remember { mutableStateOf(false) }
+
     // Video picker for album
     val videoPickerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
@@ -717,7 +731,15 @@ fun ChatScreen(
                             audioPermissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
                         }
                     },
-                    onLocationClick = { /* TODO: share location */ },
+                    onLocationClick = {
+                        showExtensionPanel = false
+                        if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                            showLocationPicker = true
+                        } else {
+                            pendingLocationAction = { showLocationPicker = true }
+                            locationPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+                        }
+                    },
                     onVoiceInputClick = {
                         if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                             showExtensionPanel = false
@@ -838,6 +860,17 @@ fun ChatScreen(
                     }
                 }
             }
+        }
+
+        // Location picker dialog
+        if (showLocationPicker) {
+            LocationPickerDialog(
+                onDismiss = { showLocationPicker = false },
+                onShare = { locationText ->
+                    showLocationPicker = false
+                    viewModel.sendMessage(locationText)
+                }
+            )
         }
 
         // Voice recording overlay

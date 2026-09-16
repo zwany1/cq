@@ -1,0 +1,42 @@
+[
+  {
+    "description": "微笑",
+    "fileName": "smile.png"
+  },
+  {
+    "description": "大笑",
+    "fileName": "laugh.png"
+  },
+  {
+    "description": "哭",
+    "fileName": "cry.png"
+  },
+  {
+    "description": "生气",
+    "fileName": "angry.png"
+  },
+  {
+    "description": "害羞",
+    "fileName": "shy.png"
+  },
+  {
+    "description": "酷",
+    "fileName": "cool.png"
+  },
+  {
+    "description": "惊讶",
+    "fileName": "wow.png"
+  },
+  {
+    "description": "睡觉",
+    "fileName": "sleep.png"
+  },
+  {
+    "description": "喜欢",
+    "fileName": "love.png"
+  },
+  {
+    "description": "好的",
+    "fileName": "ok.png"
+  }
+]
