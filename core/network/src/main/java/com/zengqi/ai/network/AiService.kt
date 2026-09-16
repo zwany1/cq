@@ -403,6 +403,40 @@ class AiService(context: Context) : AiServiceProvider {
         private val keyLastUsed = ConcurrentHashMap<String, Long>()
         private val keyCooldownUntil = ConcurrentHashMap<String, Long>()
 
+        // 模型失败冷却：模型不可用时冷却 5 分钟，期间 resolveModel 跳过该模型
+        private val modelFailureUntil = ConcurrentHashMap<String, Long>()
+        private const val MODEL_FAILURE_COOLDOWN_MS = 5 * 60_000L
+
+        /**
+         * 解析当前可用模型：配置模型在冷却期时自动切换到内置候选列表的下一个可用模型。
+         * 无可用候选时返回配置模型（由调用方报错）。
+         */
+        fun resolveModel(config: ApiConfig): String {
+            val now = System.currentTimeMillis()
+            val configured = config.model
+            if ((modelFailureUntil["$configured"] ?: 0L) <= now) return configured
+            // 配置模型冷却中 → 从内置候选列表找可用模型
+            val candidates = com.zengqi.ai.database.BUILTIN_MODEL_CANDIDATES
+            for (candidate in candidates) {
+                if (candidate == configured) continue
+                if ((modelFailureUntil[candidate] ?: 0L) <= now) {
+                    SecureLog.api("MODEL", "配置模型 $configured 冷却中，切换到 $candidate")
+                    return candidate
+                }
+            }
+            SecureLog.api("MODEL", "所有内置候选均冷却中，回退 $configured")
+            return configured
+        }
+
+        fun markModelFailed(model: String) {
+            modelFailureUntil[model] = System.currentTimeMillis() + MODEL_FAILURE_COOLDOWN_MS
+            SecureLog.w("AiService", "模型失败冷却5分钟: $model")
+        }
+
+        fun resetModelState() {
+            modelFailureUntil.clear()
+        }
+
         // ── Provider registry ──
         private val providers: Map<ApiProvider, AiProvider> = mapOf(
             ApiProvider.OPENAI to OpenAiCompatibleProvider(),
@@ -462,6 +496,11 @@ class AiService(context: Context) : AiServiceProvider {
         fun markKeyFailed(key: String) {
             keyCooldownUntil[key] = System.currentTimeMillis() + KEY_FAILURE_COOLDOWN_MS
             SecureLog.w("AiService", "Key失败冷却5s: ${key.take(8)}...")
+        }
+
+        fun markKeyAndModelFailed(key: String, model: String) {
+            markKeyFailed(key)
+            markModelFailed(model)
         }
 
         fun resetKeyState() {
@@ -733,7 +772,7 @@ class AiService(context: Context) : AiServiceProvider {
                     jsonArray.put(msgObj)
                 }
                 val jsonBody = org.json.JSONObject()
-                jsonBody.put("model", config.model)
+                jsonBody.put("model", resolveModel(config))
                 jsonBody.put("messages", jsonArray)
                 if (!requiresFixedTemperature(config.model)) {
                     jsonBody.put("temperature", temperature)
@@ -1303,9 +1342,10 @@ $chatText
         for (i in 0 until allKeys.size) {
             val keyIndex = (startIdx + i) % allKeys.size
             val currentKey = allKeys[keyIndex]
+            val lastUsedModel = resolveModel(config)
             try {
                 val jsonBody = org.json.JSONObject()
-                jsonBody.put("model", config.model)
+                jsonBody.put("model", lastUsedModel)
                 jsonBody.put("messages", jsonArray)
                 if (!requiresFixedTemperature(config.model)) {
                     jsonBody.put("temperature", 0.7)
@@ -1351,7 +1391,7 @@ $chatText
                 return content
             } catch (e: Exception) {
                 lastException = e
-                markKeyFailed(currentKey)
+                markKeyAndModelFailed(currentKey, lastUsedModel)
                 SecureLog.w("AiService", "Test Key #${keyIndex + 1}/${allKeys.size} 失败: ${e.message}")
                 if (i < allKeys.size - 1) continue else throw lastException
             }
@@ -1438,9 +1478,10 @@ $chatText
         for (i in 0 until allKeys.size) {
             val keyIndex = (startIdx + i) % allKeys.size
             val currentKey = allKeys[keyIndex]
+            val lastUsedModel = resolveModel(config)
             try {
                 val jsonBody = org.json.JSONObject()
-                jsonBody.put("model", config.model)
+                jsonBody.put("model", lastUsedModel)
                 jsonBody.put("messages", jsonArray)
                 if (!requiresFixedTemperature(config.model)) {
                     jsonBody.put("temperature", safeTemp.toDouble())
@@ -1460,6 +1501,7 @@ $chatText
                     jsonBody.put("tool_choice", "auto")
                 }
 
+                val lastUsedModel = resolveModel(config)
                 val requestBuilder = okhttp3.Request.Builder()
                     .url(url)
                     .addHeader("Content-Type", "application/json")
@@ -1524,7 +1566,7 @@ $chatText
                 return Tuple4(content, reasoning, null, finishReason)
             } catch (e: Exception) {
                 lastException = e
-                markKeyFailed(currentKey)
+                markKeyAndModelFailed(currentKey, lastUsedModel)
                 SecureLog.w("AiService", "Chat Key #${keyIndex + 1}/${allKeys.size} 失败: ${e.message}")
                 if (i < allKeys.size - 1) continue else throw lastException
             }
@@ -1632,7 +1674,7 @@ $chatText
             jsonArray.put(msgObj)
         }
         val jsonBody = org.json.JSONObject()
-        jsonBody.put("model", config.model)
+        jsonBody.put("model", resolveModel(config))
         jsonBody.put("messages", jsonArray)
         if (!requiresFixedTemperature(config.model)) {
             jsonBody.put("temperature", 0.7)
@@ -1997,7 +2039,7 @@ $chatText
                 }
 
                 val jsonBody = org.json.JSONObject()
-                jsonBody.put("model", config.model)
+                jsonBody.put("model", resolveModel(config))
                 jsonBody.put("messages", messagesJson)
                 // Some models only support temperature=1
                 if (!requiresFixedTemperature(config.model)) {

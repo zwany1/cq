@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 /**
- * 内置 SenseAudio 模型种子：首启写入并激活；检测到旧内置 TokenRouter
- * 配置（模型通道已下架）时自动升级为 SenseAudio。
+ * 内置免费模型种子：写入多路免费模型配置（SenseAudio + 备用中继），
+ * 由 resolveConfig 按"可用优先"自动切换。旧内置配置自动升级。
  * 用户自行添加的其他配置不受影响。
  */
 object BuiltinApiSeeder {
@@ -69,3 +69,6 @@ object BuiltinApiSeeder {
 }
 
 private const val BUILTIN_KEY = "sk-7tUHUF12DyTxolpwjKFDYiT5BB0pBAUO27B4Ff11B02246Db98A18a4bF67a9b2a"
+
+/** 内置免费模型候选（按顺序尝试，前一个不可用自动切换后一个） */
+val BUILTIN_MODEL_CANDIDATES = listOf("glm-5.3-flash", "qwen3.6-35b-a3b", "qwen3.8-27b", "deepseek-v4-flash-0731")
